@@ -25,7 +25,8 @@ require 'date'
 begin
   require 'rubygems'
   unless defined? Advantage
-    require 'advantage'
+    # require "advantage"
+    require_relative "../lib/advantage/advantage.so"
   end
 end
 
