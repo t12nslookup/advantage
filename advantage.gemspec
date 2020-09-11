@@ -1,11 +1,17 @@
 
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "advantage/version"
+
+pkg_version = ''
+File.open(File.join('ext', 'advantage', 'advantage.c') ) do |f|
+  f.grep( /const char\* VERSION/ ) do |line|
+    pkg_version = /\s*const char\* VERSION\s*=\s*["|']([^"']*)["|'];\s*/.match(line)[1]
+  end
+end
 
 Gem::Specification.new do |spec|
   spec.name          = 'advantage'
-  spec.version       = Advantage::VERSION
+  spec.version       = pkg_version
   spec.authors       = ['Edgar Sherman']
   spec.email         = 'advantage@sybase.com'
 
