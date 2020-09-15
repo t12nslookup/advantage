@@ -82,7 +82,7 @@ By default, rake will attempt to use Microsoft <tt>nmake</tt> when building unde
 
 This script makes a connection, prints <tt>Successful Ruby Connection</tt> to Advantage, then disconnects.
 
-   # load the Advantage gem
+   # load the Advantage gem (not needed if included in your Gemfile)
    begin
      require 'rubygems'
      gem 'advantage'
@@ -97,13 +97,16 @@ This script makes a connection, prints <tt>Successful Ruby Connection</tt> to Ad
    # initialize the interface (loads the DLL/SO)
    Advantage::API.ads_initialize_interface( api )
 
-   # initialize our api object
+   # initialize our api object.  You need access to the libace.(so|dll) file to run this command
+   # See: https://devzone.advantagedatabase.com/dz/content.aspx?Key=20&Release=19&Product=14
    api.ads_init()
 
    # create a connection
    conn = api.ads_new_connection()
 
    # establish a connection
+   # ads_connect appears to be a call to the AdsConnect101 procedure:
+   # https://devzone.advantagedatabase.com/dz/webhelp/Advantage11.1/index.html?ace_adsconnect101.htm
    api.ads_connect(conn, "data source=c:\\test\\ruby.add;user id=adssys;")
 
    # execute a query without a result set

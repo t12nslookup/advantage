@@ -12,11 +12,11 @@ end
 Gem::Specification.new do |spec|
   spec.name          = 'advantage'
   spec.version       = pkg_version
-  spec.authors       = ['Edgar Sherman']
-  spec.email         = 'advantage@sybase.com'
+  spec.authors       = ['Edgar Sherman', 'Jon Adams']
+  spec.email         = ['advantage@sybase.com', 't12nslookup@googlemail.com']
 
-  spec.summary       = %q{Advantage library for Ruby}
-  spec.description   = %q{Advantage Driver for Ruby}
+  spec.summary       = %q{Advantage Database library for Ruby}
+  spec.description   = %q{Advantage Database Driver for Ruby}
   spec.homepage      = 'http://devzone.advantagedatabase.com'
   spec.license       = 'Apache-2.0'
 
@@ -26,8 +26,9 @@ Gem::Specification.new do |spec|
     spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
     spec.metadata["homepage_uri"] = spec.homepage
-    spec.metadata["source_code_uri"] = 'http://devzone.advantagedatabase.com/'
-    spec.metadata["changelog_uri"] = 'http://devzone.advantagedatabase.com/'
+    # Changed to the github project, as this is the actively maintained source, now.
+    spec.metadata["source_code_uri"] = 'https://github.com/t12nslookup/advantage/'
+    spec.metadata["changelog_uri"] = 'https://github.com/t12nslookup/advantage/blob/master/CHANGELOG.md'
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."
