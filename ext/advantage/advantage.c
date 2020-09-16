@@ -568,7 +568,7 @@ static_AdvantageInterface_ads_execute_immediate( VALUE imp_drh, VALUE ads_conn, 
 
    result = s_imp_drh->api.ads_execute_immediate( s_ads_conn, ( UNSIGNED8* )s_sql );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -612,7 +612,7 @@ static_AdvantageInterface_ads_execute_direct( VALUE imp_drh, VALUE ads_conn, VAL
 
    if( resultset )
       {
-      tdata = INT2NUM( resultset );
+      tdata = INT2FIX( resultset );
       }
    else
       {
@@ -649,7 +649,7 @@ static_AdvantageInterface_ads_num_cols( VALUE imp_drh, VALUE ads_stmt )
 
    result = s_imp_drh->api.ads_num_cols( s_stmt );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -679,7 +679,7 @@ static_AdvantageInterface_ads_num_rows( VALUE imp_drh, VALUE ads_stmt )
 
    result = s_imp_drh->api.ads_num_rows( s_stmt );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
