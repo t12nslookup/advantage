@@ -167,13 +167,13 @@ static VALUE C2RB( a_ads_data_value* value )
             tdata = ULL2NUM( *( unsigned LONG_LONG* )value->buffer );
             break;
          case A_VAL32:
-            tdata = INT2NUM( *( int * )value->buffer );
+            tdata = INT2FIX( *( int * )value->buffer );
             break;
          case A_UVAL32:
             tdata = UINT2NUM( *( unsigned int * )value->buffer );
             break;
          case A_VAL16:
-            tdata = INT2NUM( *( short * )value->buffer );
+            tdata = INT2FIX( *( short * )value->buffer );
             break;
          case A_UVAL16:
             tdata = UINT2NUM( *(  unsigned short * )value->buffer );
@@ -220,7 +220,7 @@ static_API_ads_initialize_interface( VALUE module, VALUE imp_drh )
 
    result = ads_initialize_interface(  &( s_imp_drh->api ), NULL  );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -294,14 +294,14 @@ static_AdvantageInterface_ads_init( VALUE imp_drh )
 
    if( &( s_imp_drh->api ) == NULL )
       {
-      rb_ary_push( multi_result, INT2NUM( 0 ) );
+      rb_ary_push( multi_result, INT2FIX( 0 ) );
       rb_ary_push( multi_result, Qnil  );
       }
    else
       {
       result = s_imp_drh->api.ads_init( ( UNSIGNED8* )"RUBY", 1 , &s_version_available  );
-      rb_ary_push( multi_result, INT2NUM( result ) );
-      rb_ary_push( multi_result, INT2NUM( s_version_available ) );
+      rb_ary_push( multi_result, INT2FIX( result ) );
+      rb_ary_push( multi_result, INT2FIX( s_version_available ) );
       }
 
    return(  multi_result  );
@@ -402,7 +402,7 @@ static_AdvantageInterface_ads_connect( VALUE imp_drh, VALUE ads_conn, VALUE str 
 
    result = s_imp_drh->api.ads_connect(  s_ads_conn, ( UNSIGNED8* )s_str  );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -528,7 +528,7 @@ static_AdvantageInterface_ads_error( VALUE imp_drh, VALUE ads_conn )
 
    multi_result = rb_ary_new(  );
 
-   rb_ary_push( multi_result, INT2NUM( result ) );
+   rb_ary_push( multi_result, INT2FIX( result ) );
    rb_ary_push( multi_result, rb_str_new2( s_buffer ) );
 
    return(  multi_result  );
@@ -649,7 +649,7 @@ static_AdvantageInterface_ads_num_cols( VALUE imp_drh, VALUE ads_stmt )
 
    result = s_imp_drh->api.ads_num_cols( s_stmt );
 
-   return(  INT2FIX( result )  );
+   return(  INT2NUM( result )  );
    }
 
 /*
@@ -715,7 +715,7 @@ static_AdvantageInterface_ads_get_column( VALUE imp_drh, VALUE ads_stmt, VALUE c
    result = s_imp_drh->api.ads_get_column( s_stmt, s_col_num, &value  );
 
    multi_result = rb_ary_new(  );
-   rb_ary_push( multi_result, INT2NUM( result ) );
+   rb_ary_push( multi_result, INT2FIX( result ) );
 
    if( !result )
       {
@@ -769,7 +769,7 @@ static_AdvantageInterface_ads_fetch_next( VALUE imp_drh, VALUE ads_stmt )
 
    result = s_imp_drh->api.ads_fetch_next( s_stmt );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -819,15 +819,15 @@ static_AdvantageInterface_ads_get_column_info( VALUE imp_drh, VALUE ads_stmt, VA
    result = s_imp_drh->api.ads_get_column_info( s_stmt, s_col_num, &info  );
 
    multi_result = rb_ary_new(  );
-   rb_ary_push( multi_result, INT2NUM( result ) );
+   rb_ary_push( multi_result, INT2FIX( result ) );
    rb_ary_push( multi_result, col_num  );
    rb_ary_push( multi_result, rb_str_new2( ( char* )info.name ) );
-   rb_ary_push( multi_result, INT2NUM( info.type ) );
-   rb_ary_push( multi_result, INT2NUM( info.native_type ) );
-   rb_ary_push( multi_result, INT2NUM( info.precision ) );
-   rb_ary_push( multi_result, INT2NUM( info.scale ) );
-   rb_ary_push( multi_result, INT2NUM( info.max_size ) );
-   rb_ary_push( multi_result, INT2NUM( info.nullable ) );
+   rb_ary_push( multi_result, INT2FIX( info.type ) );
+   rb_ary_push( multi_result, INT2FIX( info.native_type ) );
+   rb_ary_push( multi_result, INT2FIX( info.precision ) );
+   rb_ary_push( multi_result, INT2FIX( info.scale ) );
+   rb_ary_push( multi_result, INT2FIX( info.max_size ) );
+   rb_ary_push( multi_result, INT2FIX( info.nullable ) );
 
    return(  multi_result  );
    }
@@ -858,9 +858,9 @@ static_AdvantageInterface_AdsBeginTransaction( VALUE imp_drh, VALUE ads_conn )
 
    result = s_imp_drh->api.AdsBeginTransaction( s_ads_conn->hConnect );
    if( result == 0 )
-      return(  INT2NUM( 1 )  );
+      return(  INT2FIX( 1 )  );
    else
-      return(   INT2NUM( 0 )  );
+      return(   INT2FIX( 0 )  );
    }
 
 /*
@@ -889,7 +889,7 @@ static_AdvantageInterface_ads_commit( VALUE imp_drh, VALUE ads_conn )
 
    result = s_imp_drh->api.ads_commit( s_ads_conn );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 
@@ -919,7 +919,7 @@ static_AdvantageInterface_ads_rollback( VALUE imp_drh, VALUE ads_conn )
 
    result = s_imp_drh->api.ads_rollback( s_ads_conn );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -961,7 +961,7 @@ static_AdvantageInterface_ads_prepare( VALUE imp_drh, VALUE ads_conn, VALUE sql 
 
    if( s_stmt )
       {
-      tdata = INT2NUM(  s_stmt  );
+      tdata = INT2FIX(  s_stmt  );
       }
    else
       {
@@ -1069,7 +1069,7 @@ static_AdvantageInterface_ads_reset( VALUE imp_drh, VALUE ads_stmt )
 
    result = s_imp_drh->api.ads_reset( s_stmt );
 
-   return( INT2NUM( result ) );
+   return( INT2FIX( result ) );
    }
 
 
@@ -1104,7 +1104,7 @@ static_AdvantageInterface_ads_execute( VALUE imp_drh, VALUE ads_stmt )
       return ( 0 );
    else
       return ( 1 );*/
-   return( INT2NUM( result ) );
+   return( INT2FIX( result ) );
    }
 
 /*
@@ -1135,7 +1135,7 @@ static_AdvantageInterface_ads_affected_rows( VALUE imp_drh, VALUE ads_stmt )
 
    result = s_imp_drh->api.ads_affected_rows( s_stmt );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -1184,7 +1184,7 @@ static_AdvantageInterface_ads_describe_bind_param( VALUE imp_drh, VALUE ads_stmt
 
    multi_result = rb_ary_new(  );
 
-   rb_ary_push( multi_result, INT2NUM( result ) );
+   rb_ary_push( multi_result, INT2FIX( result ) );
 
    tdata = Data_Wrap_Struct( cA_ads_bind_param, 0, 0, s_ads_bind_param );
    rb_ary_push( multi_result, tdata );
@@ -1225,7 +1225,7 @@ static_AdvantageInterface_ads_bind_param( VALUE imp_drh, VALUE ads_stmt, VALUE i
 
    result = s_imp_drh->api.ads_bind_param( s_stmt, s_index, s_ads_bind_param );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -1267,7 +1267,7 @@ static_AdvantageInterface_ads_get_bind_param_info( VALUE imp_drh, VALUE ads_stmt
    //FIXME handle failed result
    multi_result = rb_ary_new(  );
 
-   rb_ary_push( multi_result, INT2NUM( result ) );
+   rb_ary_push( multi_result, INT2FIX( result ) );
 
    // FIXME: Is this safe to be on the stack?
    tdata = Data_Wrap_Struct( cA_ads_bind_param_info, 0, 0, &s_ads_bind_param_info );
@@ -1307,7 +1307,7 @@ static_AdvantageInterface_ads_num_params( VALUE imp_drh, VALUE ads_stmt )
 
    result = s_imp_drh->api.ads_num_params( s_stmt );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -1341,7 +1341,7 @@ static_AdvantageInterface_ads_get_next_result( VALUE imp_drh, VALUE ads_stmt )
 
    result = s_imp_drh->api.ads_get_next_result( s_stmt );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
@@ -1376,7 +1376,7 @@ static_AdvantageInterface_ads_fetch_absolute( VALUE imp_drh, VALUE ads_stmt, VAL
    s_offset = NUM2INT( offset );
    result = s_imp_drh->api.ads_fetch_absolute( s_stmt, s_offset );
 
-   return(  INT2NUM( result )  );
+   return(  INT2FIX( result )  );
    }
 
 /*
