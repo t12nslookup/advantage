@@ -19,42 +19,42 @@
 #
 #====================================================
 
-require 'test/unit'
-require 'date'
+require "test/unit"
+require "date"
 
 begin
-  require 'rubygems'
+  require "rubygems"
   unless defined? Advantage
-    # require "advantage"
-    require_relative "../lib/advantage/advantage.so"
+    require "advantage"
+    # require_relative "../lib/advantage/advantage.so"
   end
 end
 
 class Types
-    A_INVALID_TYPE= 0
-    A_BINARY      = 1
-    A_STRING      = 2
-    A_DOUBLE      = 3
-    A_VAL64       = 4
-    A_UVAL64      = 5
-    A_VAL32       = 6
-    A_UVAL32      = 7
-    A_VAL16       = 8
-    A_UVAL16      = 9
-    A_VAL8        = 10
-    A_UVAL8       = 11
-    A_NCHAR       = 12
-    A_DECIMAL     = 13
-    A_DATE        = 14
-    A_TIME        = 15
-    A_TIMESTAMP   = 16
+  A_INVALID_TYPE = 0
+  A_BINARY = 1
+  A_STRING = 2
+  A_DOUBLE = 3
+  A_VAL64 = 4
+  A_UVAL64 = 5
+  A_VAL32 = 6
+  A_UVAL32 = 7
+  A_VAL16 = 8
+  A_UVAL16 = 9
+  A_VAL8 = 10
+  A_UVAL8 = 11
+  A_NCHAR = 12
+  A_DECIMAL = 13
+  A_DATE = 14
+  A_TIME = 15
+  A_TIMESTAMP = 16
 end
 
 class Direction
-    DD_INVALID       = 0
-    DD_INPUT         = 1
-    DD_OUTPUT        = 2
-    DD_INPUT_OUTPUT  = 3
+  DD_INVALID = 0
+  DD_INPUT = 1
+  DD_OUTPUT = 2
+  DD_INPUT_OUTPUT = 3
 end
 
 class Advantage_Test < Test::Unit::TestCase
@@ -62,32 +62,33 @@ class Advantage_Test < Test::Unit::TestCase
     @api = Advantage::AdvantageInterface.new()
     assert_not_nil @api
     assert_nothing_raised do
-      Advantage::API.ads_initialize_interface( @api )
+      Advantage::API.ads_initialize_interface(@api)
     end
     assert_nothing_raised do
       @api.ads_init()
     end
     @conn = @api.ads_new_connection()
     assert_not_nil @conn
-    conn_str = "data source=c:\\test\\ruby.add;user id=adssys;DateFormat=YYYY-MM-DD"
+    # conn_str = "data source=c:\\test\\ruby.add;user id=adssys;DateFormat=YYYY-MM-DD"
+    conn_str = "data source=//172.30.16.1:6262/c\$/ads/db/test/ruby.add;user id=adssys;DateFormat=YYYY-MM-DD;CommType=TCP_IP;Compression=INTERNET"
     assert_succeeded @api.ads_connect(@conn, conn_str)
   end
 
   def teardown
-    assert_succeeded @api.ads_execute_immediate(@conn, 'SELECT 1 FROM system.iota')
+    assert_succeeded @api.ads_execute_immediate(@conn, "SELECT 1 FROM system.iota")
     assert_nil @api.ads_disconnect(@conn)
-    assert_failed @api.ads_execute_immediate(@conn, 'SELECT 1 FROM system.iota')
+    assert_failed @api.ads_execute_immediate(@conn, "SELECT 1 FROM system.iota")
     assert_nil @api.ads_free_connection(@conn)
     assert_nothing_raised do
       @api.ads_fini()
     end
     assert_nothing_raised do
-      Advantage::API.ads_finalize_interface( @api )
+      Advantage::API.ads_finalize_interface(@api)
     end
   end
 
   def test_execute_immediate
-    assert_succeeded @api.ads_execute_immediate(@conn, 'SELECT 1 FROM system.iota')
+    assert_succeeded @api.ads_execute_immediate(@conn, "SELECT 1 FROM system.iota")
   end
 
   #EJS - Need to update the EQUAL, etc.
@@ -108,7 +109,7 @@ class Advantage_Test < Test::Unit::TestCase
     @api.AdsBeginTransaction(@conn)
     id = setup_transaction
     @api.ads_rollback(@conn)
-    sql = "SELECT * FROM test where \"id\" = "  + id.to_s + ";"
+    sql = "SELECT * FROM test where \"id\" = " + id.to_s + ";"
     rs = exec_direct_with_test(sql)
     assert_failed @api.ads_fetch_next(rs)
   end
@@ -116,7 +117,7 @@ class Advantage_Test < Test::Unit::TestCase
   def test_commit
     id = setup_transaction
     @api.ads_commit(@conn)
-    sql = "SELECT * FROM test where \"id\" = "  + id.to_s + ";"
+    sql = "SELECT * FROM test where \"id\" = " + id.to_s + ";"
     rs = exec_direct_with_test(sql)
     assert_succeeded @api.ads_fetch_next(rs)
     res, ret_id = @api.ads_get_column(rs, 0)
@@ -127,11 +128,11 @@ class Advantage_Test < Test::Unit::TestCase
   end
 
   def test_column_info
-     rs = exec_direct_with_test("SELECT TOP 2 * FROM \"types\" ORDER BY \"id\"")
+    rs = exec_direct_with_test("SELECT TOP 2 * FROM \"types\" ORDER BY \"id\"")
     assert_equal 12, @api.ads_num_cols(rs)
     assert_column_info(rs, 0, "id", Types::A_VAL32, 4)
     assert_column_info(rs, 1, "_blob_", Types::A_BINARY, 9)
-    assert_column_info(rs, 2, "_numeric_", Types::A_DECIMAL, 4)
+    assert_column_info(rs, 2, "_numeric_", Types::A_DECIMAL, 5)
     assert_column_info(rs, 3, "_char_", Types::A_STRING, 255)
     assert_column_info(rs, 4, "_memo_", Types::A_STRING, 9)
     assert_column_info(rs, 5, "_int_", Types::A_VAL32, 4)
@@ -146,30 +147,30 @@ class Advantage_Test < Test::Unit::TestCase
   #EJS - Check out return values
   #BLOB, LOGICAL
   def test_bounds_on_types
-     rs = exec_direct_with_test("SELECT TOP 2 * FROM \"types\" ORDER BY \"id\"")
+    rs = exec_direct_with_test("SELECT TOP 2 * FROM \"types\" ORDER BY \"id\"")
     assert_succeeded @api.ads_fetch_next(rs)
     assert_class_and_value(rs, String, 1, "x") #Blob
     assert_class_and_value(rs, String, 2, " 1.10")
-    assert_class_and_value(rs, String, 3, 'Bounded String Test                                                                                                                                                                                                                                            ')
-    assert_class_and_value(rs, String, 4, 'Unbounded String Test')
-    assert_class_and_value(rs, Fixnum, 5, 1)
-    assert_class_and_value(rs, Fixnum, 6, 1)
-    assert_class_and_value(rs, Fixnum, 7, 1) #Logical
+    assert_class_and_value(rs, String, 3, "Bounded String Test                                                                                                                                                                                                                                            ")
+    assert_class_and_value(rs, String, 4, "Unbounded String Test")
+    assert_class_and_value(rs, Integer, 5, 1)
+    assert_class_and_value(rs, Integer, 6, 1)
+    assert_class_and_value(rs, Integer, 7, 1) #Logical
     assert_date_and_time(rs, Date, 8, Date.new(1999, 1, 2))
     assert_date_and_time(rs, DateTime, 9, DateTime.new(1999, 1, 2, 21, 20, 53))
-    assert_class_and_float_value(rs, Float, 10, 3.402823e+38, 1e+32 )
+    assert_class_and_float_value(rs, Float, 10, 3.402823e+38, 1e+32)
 
     assert_succeeded @api.ads_fetch_next(rs)
     assert_class_and_value(rs, String, 1, 255.chr) #Blob
-    assert_class_and_value(rs, String, 2, "-1.1")
-    assert_class_and_value(rs, String, 3, '                                                                                                                                                                                                                                                               ')
+    assert_class_and_value(rs, String, 2, "-1.10")
+    assert_class_and_value(rs, String, 3, "                                                                                                                                                                                                                                                               ")
     assert_class_and_value(rs, NilClass, 4, nil)
-    assert_class_and_value(rs, Fixnum, 5, 0)
-    assert_class_and_value(rs, Fixnum, 6, 0)
-    assert_class_and_value(rs, Fixnum, 7, 0) #Logical
+    assert_class_and_value(rs, Integer, 5, 0)
+    assert_class_and_value(rs, Integer, 6, 0)
+    assert_class_and_value(rs, Integer, 7, 0) #Logical
     assert_class_and_value(rs, NilClass, 8, nil)
     assert_class_and_value(rs, NilClass, 9, nil)
-    assert_class_and_float_value(rs, Float, 10, -3.402823e+38, 1e+32 )
+    assert_class_and_float_value(rs, Float, 10, -3.402823e+38, 1e+32)
     assert_nil @api.ads_free_stmt(rs)
   end
 
@@ -182,14 +183,14 @@ class Advantage_Test < Test::Unit::TestCase
     assert_equal Direction::DD_INPUT, param.get_direction()
     #assert_failed @api.ads_execute(stmt)
 
-    assert_nil param.set_value(0);
+    assert_nil param.set_value(0)
     @api.ads_bind_param(stmt, 0, param)
     assert_succeeded @api.ads_execute(stmt)
     assert_succeeded @api.ads_fetch_next(stmt)
     assert_class_and_value(stmt, String, 3, "Bounded String Test                                                                                                                                                                                                                                            ")
 
     @api.ads_reset(stmt)
-    assert_nil param.set_value(1);
+    assert_nil param.set_value(1)
     @api.ads_bind_param(stmt, 0, param)
     assert_succeeded @api.ads_execute(stmt)
     assert_succeeded @api.ads_fetch_next(stmt)
@@ -211,13 +212,13 @@ class Advantage_Test < Test::Unit::TestCase
   end
 
   def test_insert_int32
-    assert_insert("_int_", 2147483646, Bignum)
-    assert_insert("_int_", -2147483646, Bignum)
+    assert_insert("_int_", 2147483646, Integer)
+    assert_insert("_int_", -2147483646, Integer)
   end
 
   def test_insert_int8
-    assert_insert("_short_", 32767, Fixnum)
-    assert_insert("_short_", -32767, Fixnum)
+    assert_insert("_short_", 32767, Integer)
+    assert_insert("_short_", -32767, Integer)
   end
 
   def test_insert_date
@@ -237,10 +238,10 @@ class Advantage_Test < Test::Unit::TestCase
     stmt = @api.ads_prepare(@conn, 'INSERT INTO "types"("id", "' + column_name + '", "_logical_") VALUES(3, ?, true)')
     assert_not_nil stmt
     res, param = @api.ads_describe_bind_param(stmt, 0)
-    if type == Date or type == DateTime then
-      assert_nil param.set_value(value.strftime("%F %T"));
+    if type == Date or type == DateTime
+      assert_nil param.set_value(value.strftime("%F %T"))
     else
-      assert_nil param.set_value(value);
+      assert_nil param.set_value(value)
     end
     @api.ads_bind_param(stmt, 0, param)
     assert_succeeded @api.ads_execute(stmt)
@@ -248,7 +249,7 @@ class Advantage_Test < Test::Unit::TestCase
 
     rs = exec_direct_with_test('SELECT "' + column_name + '" FROM "types" WHERE "id" = 3')
     assert_succeeded @api.ads_fetch_next(rs)
-    if type == Date or type == DateTime then
+    if type == Date or type == DateTime
       assert_date_and_time(rs, type, 0, value)
     elsif type == Float
       assert_class_and_float_value(rs, type, 0, value, delta)
@@ -262,7 +263,7 @@ class Advantage_Test < Test::Unit::TestCase
   end
 
   def assert_column_info(rs, pos, expected_col_name, expected_col_type, expected_col_size)
-    res, col_num, col_name, col_type, col_native_type, col_precision, col_scale, col_size, col_nullable = @api.ads_get_column_info(rs, pos);
+    res, col_num, col_name, col_type, col_native_type, col_precision, col_scale, col_size, col_nullable = @api.ads_get_column_info(rs, pos)
     assert_succeeded res
     assert_equal expected_col_name, col_name
     assert_equal expected_col_type, col_type
@@ -304,7 +305,7 @@ class Advantage_Test < Test::Unit::TestCase
     assert_succeeded res
     assert_not_nil id
 
-    sql = "SELECT * FROM test where \"id\" = "  + id.to_s + ";"
+    sql = "SELECT * FROM test where \"id\" = " + id.to_s + ";"
     rs = @api.ads_execute_direct(@conn, sql)
     assert_not_nil rs
 
@@ -316,8 +317,8 @@ class Advantage_Test < Test::Unit::TestCase
 
   def exec_direct_with_test(sql)
     rs = @api.ads_execute_direct(@conn, sql)
-    code, msg =  @api.ads_error(@conn)
-    assert_not_nil rs,  "SQL Code: #{code}; Message: #{msg}"
+    code, msg = @api.ads_error(@conn)
+    assert_not_nil rs, "SQL Code: #{code}; Message: #{msg}"
     rs
   end
 
@@ -328,6 +329,4 @@ class Advantage_Test < Test::Unit::TestCase
   def assert_failed(val)
     assert_equal 0, val, @api.ads_error(@conn)
   end
-
 end
-

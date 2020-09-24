@@ -6,8 +6,6 @@ require "rake/extensiontask"
 
 #task :default => :spec
 
-
 Rake::ExtensionTask.new("advantage") do |ext|
   ext.lib_dir = "lib/advantage"
 end
-

@@ -21,6 +21,9 @@
 
 require 'mkmf'
 
+CONFIG["debugflags"] = "-ggdb3"
+CONFIG["optflags"] = "-O0"
+
 dir_config('ADS')
 
 create_makefile("advantage")

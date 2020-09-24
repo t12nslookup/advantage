@@ -21,13 +21,13 @@
 #include "ruby.h"
 #include "adscapidll.h"
 
-const char* VERSION = "0.1.1";
+const char *VERSION = "0.1.2";
 
 typedef struct imp_drh_st
-   {
-   AdvantageInterface  api;
-   void                *adscapi_context;
-   } imp_drh_st;
+{
+   AdvantageInterface api;
+   void *adscapi_context;
+} imp_drh_st;
 
 // Defining the Ruby Modules
 static VALUE mAdvantage;
@@ -42,157 +42,157 @@ static VALUE cA_ads_bind_param_info;
 
 // This function is called when the module is first loaded by ruby.
 // The name of this function MUST match be Init_<modulename>.
-void Init_advantage(  );
+void Init_advantage();
 
 // Wrapper functions for the DBICAPI functions
 
 static VALUE
-static_API_ads_initialize_interface( VALUE module, VALUE imp_drh );
+static_API_ads_initialize_interface(VALUE module, VALUE imp_drh);
 
 static VALUE
-static_API_ads_finalize_interface( VALUE module, VALUE imp_drh );
+static_API_ads_finalize_interface(VALUE module, VALUE imp_drh);
 
 static VALUE
-static_AdvantageInterface_alloc( VALUE class );
+    static_AdvantageInterface_alloc(VALUE class);
 
 static VALUE
-static_AdvantageInterface_ads_init( VALUE class );
+    static_AdvantageInterface_ads_init(VALUE class);
 
 static VALUE
-static_AdvantageInterface_ads_new_connection( VALUE class );
+    static_AdvantageInterface_ads_new_connection(VALUE class);
 
 static VALUE
-static_AdvantageInterface_ads_client_version( VALUE imp_drh );
+static_AdvantageInterface_ads_client_version(VALUE imp_drh);
 
 static VALUE
-static_AdvantageInterface_ads_connect( VALUE imp_drh, VALUE ads_conn, VALUE str );
+static_AdvantageInterface_ads_connect(VALUE imp_drh, VALUE ads_conn, VALUE str);
 
 static VALUE
-static_AdvantageInterface_ads_disconnect( VALUE imp_drh, VALUE ads_conn );
+static_AdvantageInterface_ads_disconnect(VALUE imp_drh, VALUE ads_conn);
 
 static VALUE
-static_AdvantageInterface_ads_free_connection( VALUE imp_drh, VALUE ads_conn );
+static_AdvantageInterface_ads_free_connection(VALUE imp_drh, VALUE ads_conn);
 
 static VALUE
-static_AdvantageInterface_ads_fini( VALUE imp_drh );
+static_AdvantageInterface_ads_fini(VALUE imp_drh);
 
 static VALUE
-static_AdvantageInterface_ads_error( VALUE imp_drh, VALUE ads_conn );
+static_AdvantageInterface_ads_error(VALUE imp_drh, VALUE ads_conn);
 
 static VALUE
-static_AdvantageInterface_ads_execute_immediate( VALUE imp_drh, VALUE ads_conn, VALUE sql );
+static_AdvantageInterface_ads_execute_immediate(VALUE imp_drh, VALUE ads_conn, VALUE sql);
 
 static VALUE
-static_AdvantageInterface_ads_execute_direct( VALUE imp_drh, VALUE ads_conn, VALUE sql );
+static_AdvantageInterface_ads_execute_direct(VALUE imp_drh, VALUE ads_conn, VALUE sql);
 
 static VALUE
-static_AdvantageInterface_ads_num_cols( VALUE imp_drh, VALUE ads_stmt );
+static_AdvantageInterface_ads_num_cols(VALUE imp_drh, VALUE ads_stmt);
 
 static VALUE
-static_AdvantageInterface_ads_num_rows( VALUE imp_drh, VALUE ads_stmt );
+static_AdvantageInterface_ads_num_rows(VALUE imp_drh, VALUE ads_stmt);
 
 static VALUE
-static_AdvantageInterface_ads_get_column( VALUE imp_drh, VALUE ads_stmt, VALUE col_num );
+static_AdvantageInterface_ads_get_column(VALUE imp_drh, VALUE ads_stmt, VALUE col_num);
 
 static VALUE
-static_AdvantageInterface_ads_fetch_next( VALUE imp_drh, VALUE ads_stmt );
+static_AdvantageInterface_ads_fetch_next(VALUE imp_drh, VALUE ads_stmt);
 
 static VALUE
-static_AdvantageInterface_ads_get_column_info( VALUE imp_drh, VALUE ads_stmt, VALUE col_num );
+static_AdvantageInterface_ads_get_column_info(VALUE imp_drh, VALUE ads_stmt, VALUE col_num);
 
 static VALUE
-static_AdvantageInterface_AdsBeginTransaction( VALUE imp_drh, VALUE ads_conn );
+static_AdvantageInterface_AdsBeginTransaction(VALUE imp_drh, VALUE ads_conn);
 
 static VALUE
-static_AdvantageInterface_ads_commit( VALUE imp_drh, VALUE ads_conn );
+static_AdvantageInterface_ads_commit(VALUE imp_drh, VALUE ads_conn);
 
 static VALUE
-static_AdvantageInterface_ads_rollback( VALUE imp_drh, VALUE ads_conn );
+static_AdvantageInterface_ads_rollback(VALUE imp_drh, VALUE ads_conn);
 
 static VALUE
-static_AdvantageInterface_ads_prepare( VALUE imp_drh, VALUE ads_conn, VALUE sql );
+static_AdvantageInterface_ads_prepare(VALUE imp_drh, VALUE ads_conn, VALUE sql);
 
 static VALUE
-static_AdvantageInterface_ads_free_stmt( VALUE imp_drh, VALUE ads_stmt );
+static_AdvantageInterface_ads_free_stmt(VALUE imp_drh, VALUE ads_stmt);
 
 static VALUE
-static_AdvantageInterface_ads_reset( VALUE imp_drh, VALUE ads_stmt );
+static_AdvantageInterface_ads_reset(VALUE imp_drh, VALUE ads_stmt);
 
 static VALUE
-static_AdvantageInterface_ads_execute( VALUE imp_drh, VALUE ads_stmt );
+static_AdvantageInterface_ads_execute(VALUE imp_drh, VALUE ads_stmt);
 
 static VALUE
-static_AdvantageInterface_ads_affected_rows( VALUE imp_drh, VALUE ads_stmt );
+static_AdvantageInterface_ads_affected_rows(VALUE imp_drh, VALUE ads_stmt);
 
 static VALUE
-static_AdvantageInterface_ads_describe_bind_param( VALUE imp_drh, VALUE ads_stmt, VALUE index );
+static_AdvantageInterface_ads_describe_bind_param(VALUE imp_drh, VALUE ads_stmt, VALUE index);
 
 /*
  * C to Ruby Data conversion function to convert DBCAPI column type into the correct Ruby type
  */
-static VALUE C2RB( a_ads_data_value* value )
-   {
+static VALUE C2RB(a_ads_data_value *value)
+{
    VALUE tdata;
 
-   if( value == NULL || value->buffer == NULL || value->is_null == NULL )
-      {
-      rb_raise( rb_eTypeError, "Operation not allowed. Has no value." );
-      }
-   else if( *value->is_null )
-      {
+   if (value == NULL || value->buffer == NULL || value->is_null == NULL)
+   {
+      rb_raise(rb_eTypeError, "Operation not allowed. Has no value.");
+   }
+   else if (*value->is_null)
+   {
       tdata = Qnil;
-      }
+   }
    else
+   {
+      switch (value->type)
       {
-      switch( value->type )
-         {
-         case A_BINARY:
-            tdata = rb_str_new( ( char* )value->buffer, *value->length );
-            break;
-         case A_STRING:
-         case A_DATE:
-         case A_TIME:
-         case A_TIMESTAMP:
-         case A_NCHAR:
-         case A_DECIMAL:
-            tdata = rb_str_new( ( char* )value->buffer, *value->length );
-            break;
-         case A_DOUBLE:
-            tdata = rb_float_new( *( double* ) value->buffer );
-            break;
-         case A_VAL64:
-            tdata = LL2NUM( *( LONG_LONG* )value->buffer );
-            break;
-         case A_UVAL64:
-            tdata = ULL2NUM( *( unsigned LONG_LONG* )value->buffer );
-            break;
-         case A_VAL32:
-            tdata = INT2FIX( *( int * )value->buffer );
-            break;
-         case A_UVAL32:
-            tdata = UINT2NUM( *( unsigned int * )value->buffer );
-            break;
-         case A_VAL16:
-            tdata = INT2FIX( *( short * )value->buffer );
-            break;
-         case A_UVAL16:
-            tdata = UINT2NUM( *(  unsigned short * )value->buffer );
-            break;
-         case A_VAL8:
-            tdata = CHR2FIX( *( unsigned char * )value->buffer );
-            break;
-         case A_UVAL8:
-            tdata = CHR2FIX( *( unsigned char * )value->buffer );
-            break;
-         default:
-            rb_raise( rb_eTypeError, "Invalid Data Type" );
-            tdata = Qnil;
-            break;
-         }
+      case A_BINARY:
+         tdata = rb_str_new((char *)value->buffer, *value->length);
+         break;
+      case A_STRING:
+      case A_DATE:
+      case A_TIME:
+      case A_TIMESTAMP:
+      case A_NCHAR:
+      case A_DECIMAL:
+         tdata = rb_str_new((char *)value->buffer, *value->length);
+         break;
+      case A_DOUBLE:
+         tdata = rb_float_new(*(double *)value->buffer);
+         break;
+      case A_VAL64:
+         tdata = LL2NUM(*(LONG_LONG *)value->buffer);
+         break;
+      case A_UVAL64:
+         tdata = ULL2NUM(*(unsigned LONG_LONG *)value->buffer);
+         break;
+      case A_VAL32:
+         tdata = INT2FIX(*(int *)value->buffer);
+         break;
+      case A_UVAL32:
+         tdata = UINT2NUM(*(unsigned int *)value->buffer);
+         break;
+      case A_VAL16:
+         tdata = INT2FIX(*(short *)value->buffer);
+         break;
+      case A_UVAL16:
+         tdata = UINT2NUM(*(unsigned short *)value->buffer);
+         break;
+      case A_VAL8:
+         tdata = CHR2FIX(*(unsigned char *)value->buffer);
+         break;
+      case A_UVAL8:
+         tdata = CHR2FIX(*(unsigned char *)value->buffer);
+         break;
+      default:
+         rb_raise(rb_eTypeError, "Invalid Data Type");
+         tdata = Qnil;
+         break;
       }
+   }
 
    return tdata;
-   }
+}
 
 /*
  * call-seq:
@@ -211,17 +211,17 @@ static VALUE C2RB( a_ads_data_value* value )
  *
  */
 static VALUE
-static_API_ads_initialize_interface( VALUE module, VALUE imp_drh )
-   {
-   imp_drh_st* s_imp_drh;
+static_API_ads_initialize_interface(VALUE module, VALUE imp_drh)
+{
+   imp_drh_st *s_imp_drh;
    int result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
 
-   result = ads_initialize_interface(  &( s_imp_drh->api ), NULL  );
+   result = ads_initialize_interface(&(s_imp_drh->api), NULL);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -240,31 +240,31 @@ static_API_ads_initialize_interface( VALUE module, VALUE imp_drh )
  *
  */
 static VALUE
-static_API_ads_finalize_interface( VALUE module, VALUE imp_drh )
-   {
-   imp_drh_st* s_imp_drh;
+static_API_ads_finalize_interface(VALUE module, VALUE imp_drh)
+{
+   imp_drh_st *s_imp_drh;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
 
-   ads_finalize_interface( &( s_imp_drh->api ) );
+   ads_finalize_interface(&(s_imp_drh->api));
 
-   free( &( s_imp_drh->api ) );
+   free(&(s_imp_drh->api));
 
-   return(  Qnil  );
-   }
+   return (Qnil);
+}
 
 static VALUE
-static_AdvantageInterface_alloc( VALUE class )
-   {
+    static_AdvantageInterface_alloc(VALUE class)
+{
    imp_drh_st *imp_drh = NULL;
-   VALUE          tdata;
+   VALUE tdata;
 
-   imp_drh = malloc(  sizeof( imp_drh_st )  );
-   memset(  imp_drh, 0, sizeof( imp_drh_st ) );
+   imp_drh = malloc(sizeof(imp_drh_st));
+   memset(imp_drh, 0, sizeof(imp_drh_st));
 
-   tdata = Data_Wrap_Struct( class, 0, 0, imp_drh );
+   tdata = Data_Wrap_Struct(class, 0, 0, imp_drh);
    return tdata;
-   }
+}
 
 /*
  * call-seq:
@@ -281,31 +281,31 @@ static_AdvantageInterface_alloc( VALUE class )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_init( VALUE imp_drh )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_init(VALUE imp_drh)
+{
+   imp_drh_st *s_imp_drh;
    UNSIGNED32 result;
    UNSIGNED32 s_version_available;
    VALUE multi_result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
 
-   multi_result = rb_ary_new(  );
+   multi_result = rb_ary_new();
 
-   if( &( s_imp_drh->api ) == NULL )
-      {
-      rb_ary_push( multi_result, INT2FIX( 0 ) );
-      rb_ary_push( multi_result, Qnil  );
-      }
-   else
-      {
-      result = s_imp_drh->api.ads_init( ( UNSIGNED8* )"RUBY", 1 , &s_version_available  );
-      rb_ary_push( multi_result, INT2FIX( result ) );
-      rb_ary_push( multi_result, INT2FIX( s_version_available ) );
-      }
-
-   return(  multi_result  );
+   if (&(s_imp_drh->api) == NULL)
+   {
+      rb_ary_push(multi_result, INT2FIX(0));
+      rb_ary_push(multi_result, Qnil);
    }
+   else
+   {
+      result = s_imp_drh->api.ads_init((UNSIGNED8 *)"RUBY", 1, &s_version_available);
+      rb_ary_push(multi_result, INT2FIX(result));
+      rb_ary_push(multi_result, INT2FIX(s_version_available));
+   }
+
+   return (multi_result);
+}
 
 /*
  * call-seq:
@@ -325,19 +325,19 @@ static_AdvantageInterface_ads_init( VALUE imp_drh )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_new_connection( VALUE imp_drh )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* ptr;
+static_AdvantageInterface_ads_new_connection(VALUE imp_drh)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *ptr;
    VALUE tdata;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   ptr = s_imp_drh->api.ads_new_connection(  );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   ptr = s_imp_drh->api.ads_new_connection();
 
-   tdata = Data_Wrap_Struct( cA_ads_connection, 0, 0, ptr );
+   tdata = Data_Wrap_Struct(cA_ads_connection, 0, 0, ptr);
 
-   return( tdata );
-   }
+   return (tdata);
+}
 
 /*
  * call-seq:
@@ -356,17 +356,17 @@ static_AdvantageInterface_ads_new_connection( VALUE imp_drh )
  */
 
 static VALUE
-static_AdvantageInterface_ads_client_version( VALUE imp_drh )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_client_version(VALUE imp_drh)
+{
+   imp_drh_st *s_imp_drh;
    char s_buffer[255];
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
 
-   s_imp_drh->api.ads_client_version( ( UNSIGNED8* )s_buffer, 255 );
+   s_imp_drh->api.ads_client_version((UNSIGNED8 *)s_buffer, 255);
 
-   return( rb_str_new2( s_buffer ) );
-   }
+   return (rb_str_new2(s_buffer));
+}
 
 /*
  * call-seq:
@@ -388,22 +388,22 @@ static_AdvantageInterface_ads_client_version( VALUE imp_drh )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_connect( VALUE imp_drh, VALUE ads_conn, VALUE str )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
-   char* s_str;
-   UNSIGNED32   result;
+static_AdvantageInterface_ads_connect(VALUE imp_drh, VALUE ads_conn, VALUE str)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
+   char *s_str;
+   UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   s_str = StringValueCStr(  str  );
+   s_str = StringValueCStr(str);
 
-   result = s_imp_drh->api.ads_connect(  s_ads_conn, ( UNSIGNED8* )s_str  );
+   result = s_imp_drh->api.ads_connect(s_ads_conn, (UNSIGNED8 *)s_str);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -423,19 +423,18 @@ static_AdvantageInterface_ads_connect( VALUE imp_drh, VALUE ads_conn, VALUE str 
  *
  */
 static VALUE
-static_AdvantageInterface_ads_disconnect( VALUE imp_drh, VALUE ads_conn )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_disconnect(VALUE imp_drh, VALUE ads_conn)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
+   s_imp_drh->api.ads_disconnect(s_ads_conn);
 
-   s_imp_drh->api.ads_disconnect(  s_ads_conn  );
-
-   return(  Qnil  );
-   }
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -452,19 +451,18 @@ static_AdvantageInterface_ads_disconnect( VALUE imp_drh, VALUE ads_conn )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_free_connection( VALUE imp_drh, VALUE ads_conn )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_free_connection(VALUE imp_drh, VALUE ads_conn)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
+   s_imp_drh->api.ads_free_connection(s_ads_conn);
 
-   s_imp_drh->api.ads_free_connection(  s_ads_conn  );
-
-   return(  Qnil  );
-   }
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -482,16 +480,16 @@ static_AdvantageInterface_ads_free_connection( VALUE imp_drh, VALUE ads_conn )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_fini( VALUE imp_drh )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_fini(VALUE imp_drh)
+{
+   imp_drh_st *s_imp_drh;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
 
-   s_imp_drh->api.ads_fini(  );
+   s_imp_drh->api.ads_fini();
 
-   return(  Qnil  );
-   }
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -513,26 +511,26 @@ static_AdvantageInterface_ads_fini( VALUE imp_drh )
  */
 
 static VALUE
-static_AdvantageInterface_ads_error( VALUE imp_drh, VALUE ads_conn )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_error(VALUE imp_drh, VALUE ads_conn)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
    char s_buffer[255];
    UNSIGNED32 result;
    VALUE multi_result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   result = s_imp_drh->api.ads_error( s_ads_conn, ( UNSIGNED8* )s_buffer, 255 );
+   result = s_imp_drh->api.ads_error(s_ads_conn, (UNSIGNED8 *)s_buffer, 255);
 
-   multi_result = rb_ary_new(  );
+   multi_result = rb_ary_new();
 
-   rb_ary_push( multi_result, INT2FIX( result ) );
-   rb_ary_push( multi_result, rb_str_new2( s_buffer ) );
+   rb_ary_push(multi_result, INT2FIX(result));
+   rb_ary_push(multi_result, rb_str_new2(s_buffer));
 
-   return(  multi_result  );
-   }
+   return (multi_result);
+}
 
 /*
  * call-seq:
@@ -554,22 +552,22 @@ static_AdvantageInterface_ads_error( VALUE imp_drh, VALUE ads_conn )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_execute_immediate( VALUE imp_drh, VALUE ads_conn, VALUE sql )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
-   char* s_sql;
+static_AdvantageInterface_ads_execute_immediate(VALUE imp_drh, VALUE ads_conn, VALUE sql)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
+   char *s_sql;
    UNSIGNED32 result;
 
-   s_sql = StringValueCStr(  sql  );
+   s_sql = StringValueCStr(sql);
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   result = s_imp_drh->api.ads_execute_immediate( s_ads_conn, ( UNSIGNED8* )s_sql );
+   result = s_imp_drh->api.ads_execute_immediate(s_ads_conn, (UNSIGNED8 *)s_sql);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -595,32 +593,32 @@ static_AdvantageInterface_ads_execute_immediate( VALUE imp_drh, VALUE ads_conn, 
  *
  */
 static VALUE
-static_AdvantageInterface_ads_execute_direct( VALUE imp_drh, VALUE ads_conn, VALUE sql )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_execute_direct(VALUE imp_drh, VALUE ads_conn, VALUE sql)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
    ADSHANDLE resultset = 0;
-   char* s_sql;
+   char *s_sql;
    VALUE tdata;
 
-   s_sql = StringValueCStr(  sql  );
+   s_sql = StringValueCStr(sql);
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   resultset = s_imp_drh->api.ads_execute_direct( s_ads_conn, ( UNSIGNED8* )s_sql );
+   resultset = s_imp_drh->api.ads_execute_direct(s_ads_conn, (UNSIGNED8 *)s_sql);
 
-   if( resultset )
-      {
-      tdata = INT2FIX( resultset );
-      }
-   else
-      {
-      tdata = Qnil;
-      }
-
-   return( tdata );
+   if (resultset)
+   {
+      tdata = INT2FIX(resultset);
    }
+   else
+   {
+      tdata = Qnil;
+   }
+
+   return (tdata);
+}
 
 /*
  * call-seq:
@@ -637,20 +635,20 @@ static_AdvantageInterface_ads_execute_direct( VALUE imp_drh, VALUE ads_conn, VAL
  *
  */
 static VALUE
-static_AdvantageInterface_ads_num_cols( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_num_cols(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
-   result = s_imp_drh->api.ads_num_cols( s_stmt );
+   result = s_imp_drh->api.ads_num_cols(s_stmt);
 
-   return(  INT2NUM( result )  );
-   }
+   return (INT2NUM(result));
+}
 
 /*
  * call-seq:
@@ -667,20 +665,20 @@ static_AdvantageInterface_ads_num_cols( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_num_rows( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_num_rows(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
-   result = s_imp_drh->api.ads_num_rows( s_stmt );
+   result = s_imp_drh->api.ads_num_rows(s_stmt);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -698,43 +696,43 @@ static_AdvantageInterface_ads_num_rows( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_get_column( VALUE imp_drh, VALUE ads_stmt, VALUE col_num )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_get_column(VALUE imp_drh, VALUE ads_stmt, VALUE col_num)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 s_col_num;
    a_ads_data_value value;
    UNSIGNED32 result;
    VALUE multi_result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
-   s_col_num = NUM2INT( col_num );
+   s_stmt = NUM2ULONG(ads_stmt);
+   s_col_num = NUM2INT(col_num);
 
-   result = s_imp_drh->api.ads_get_column( s_stmt, s_col_num, &value  );
+   result = s_imp_drh->api.ads_get_column(s_stmt, s_col_num, &value);
 
-   multi_result = rb_ary_new(  );
-   rb_ary_push( multi_result, INT2FIX( result ) );
+   multi_result = rb_ary_new();
+   rb_ary_push(multi_result, INT2FIX(result));
 
-   if( !result )
-      {
-      rb_ary_push( multi_result, Qnil );
-      }
-   else
-      {
-      if( *value.is_null )
-         {
-         rb_ary_push( multi_result, Qnil );
-         }
-      else
-         {
-         rb_ary_push( multi_result, C2RB( &value ) );
-         }
-      }
-
-   return(  multi_result  );
+   if (!result)
+   {
+      rb_ary_push(multi_result, Qnil);
    }
+   else
+   {
+      if (*value.is_null)
+      {
+         rb_ary_push(multi_result, Qnil);
+      }
+      else
+      {
+         rb_ary_push(multi_result, C2RB(&value));
+      }
+   }
+
+   return (multi_result);
+}
 
 /*
  * call-seq:
@@ -757,20 +755,20 @@ static_AdvantageInterface_ads_get_column( VALUE imp_drh, VALUE ads_stmt, VALUE c
  *
  */
 static VALUE
-static_AdvantageInterface_ads_fetch_next( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_fetch_next(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
-   result = s_imp_drh->api.ads_fetch_next( s_stmt );
+   result = s_imp_drh->api.ads_fetch_next(s_stmt);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -802,35 +800,35 @@ static_AdvantageInterface_ads_fetch_next( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_get_column_info( VALUE imp_drh, VALUE ads_stmt, VALUE col_num )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_get_column_info(VALUE imp_drh, VALUE ads_stmt, VALUE col_num)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 s_col_num;
    a_ads_column_info info;
    UNSIGNED32 result;
    VALUE multi_result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
-   s_col_num = NUM2INT( col_num );
+   s_stmt = NUM2ULONG(ads_stmt);
+   s_col_num = NUM2INT(col_num);
 
-   result = s_imp_drh->api.ads_get_column_info( s_stmt, s_col_num, &info  );
+   result = s_imp_drh->api.ads_get_column_info(s_stmt, s_col_num, &info);
 
-   multi_result = rb_ary_new(  );
-   rb_ary_push( multi_result, INT2FIX( result ) );
-   rb_ary_push( multi_result, col_num  );
-   rb_ary_push( multi_result, rb_str_new2( ( char* )info.name ) );
-   rb_ary_push( multi_result, INT2FIX( info.type ) );
-   rb_ary_push( multi_result, INT2FIX( info.native_type ) );
-   rb_ary_push( multi_result, INT2FIX( info.precision ) );
-   rb_ary_push( multi_result, INT2FIX( info.scale ) );
-   rb_ary_push( multi_result, INT2FIX( info.max_size ) );
-   rb_ary_push( multi_result, INT2FIX( info.nullable ) );
+   multi_result = rb_ary_new();
+   rb_ary_push(multi_result, INT2FIX(result));
+   rb_ary_push(multi_result, col_num);
+   rb_ary_push(multi_result, rb_str_new2((char *)info.name));
+   rb_ary_push(multi_result, INT2FIX(info.type));
+   rb_ary_push(multi_result, INT2FIX(info.native_type));
+   rb_ary_push(multi_result, INT2FIX(info.precision));
+   rb_ary_push(multi_result, INT2FIX(info.scale));
+   rb_ary_push(multi_result, INT2FIX(info.max_size));
+   rb_ary_push(multi_result, INT2FIX(info.nullable));
 
-   return(  multi_result  );
-   }
+   return (multi_result);
+}
 
 /*
  * call-seq:
@@ -847,21 +845,21 @@ static_AdvantageInterface_ads_get_column_info( VALUE imp_drh, VALUE ads_stmt, VA
  *
  */
 static VALUE
-static_AdvantageInterface_AdsBeginTransaction( VALUE imp_drh, VALUE ads_conn )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_AdsBeginTransaction(VALUE imp_drh, VALUE ads_conn)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   result = s_imp_drh->api.AdsBeginTransaction( s_ads_conn->hConnect );
-   if( result == 0 )
-      return(  INT2FIX( 1 )  );
+   result = s_imp_drh->api.AdsBeginTransaction(s_ads_conn->hConnect);
+   if (result == 0)
+      return (INT2FIX(1));
    else
-      return(   INT2FIX( 0 )  );
-   }
+      return (INT2FIX(0));
+}
 
 /*
  * call-seq:
@@ -878,20 +876,19 @@ static_AdvantageInterface_AdsBeginTransaction( VALUE imp_drh, VALUE ads_conn )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_commit( VALUE imp_drh, VALUE ads_conn )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_commit(VALUE imp_drh, VALUE ads_conn)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   result = s_imp_drh->api.ads_commit( s_ads_conn );
+   result = s_imp_drh->api.ads_commit(s_ads_conn);
 
-   return(  INT2FIX( result )  );
-   }
-
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -908,19 +905,19 @@ static_AdvantageInterface_ads_commit( VALUE imp_drh, VALUE ads_conn )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_rollback( VALUE imp_drh, VALUE ads_conn )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_rollback(VALUE imp_drh, VALUE ads_conn)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   result = s_imp_drh->api.ads_rollback( s_ads_conn );
+   result = s_imp_drh->api.ads_rollback(s_ads_conn);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -943,33 +940,33 @@ static_AdvantageInterface_ads_rollback( VALUE imp_drh, VALUE ads_conn )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_prepare( VALUE imp_drh, VALUE ads_conn, VALUE sql )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_prepare(VALUE imp_drh, VALUE ads_conn, VALUE sql)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
    ADSHANDLE s_stmt = 0;
-   char* s_sql;
+   char *s_sql;
    VALUE tdata;
 
-   s_sql = StringValueCStr(  sql  );
+   s_sql = StringValueCStr(sql);
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
    //EJS Passing FALSE for isUnicode
-   s_stmt = s_imp_drh->api.ads_prepare( s_ads_conn, ( UNSIGNED8* )s_sql, '\0' );
+   s_stmt = s_imp_drh->api.ads_prepare(s_ads_conn, (UNSIGNED8 *)s_sql, '\0');
 
-   if( s_stmt )
-      {
-      tdata = INT2FIX(  s_stmt  );
-      }
-   else
-      {
-      tdata = Qnil;
-      }
-
-   return( tdata );
+   if (s_stmt)
+   {
+      tdata = INT2FIX(s_stmt);
    }
+   else
+   {
+      tdata = Qnil;
+   }
+
+   return (tdata);
+}
 
 /*
  * call-seq:
@@ -989,59 +986,59 @@ static_AdvantageInterface_ads_prepare( VALUE imp_drh, VALUE ads_conn, VALUE sql 
  *
  */
 static VALUE
-static_AdvantageInterface_ads_free_stmt( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_free_stmt(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    int i;
    int number_of_params = 0;
    a_ads_bind_param_info bind_info;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
-   number_of_params = s_imp_drh->api.ads_num_params( s_stmt );
+   number_of_params = s_imp_drh->api.ads_num_params(s_stmt);
 
-   for( i = 0; i < number_of_params; i++ )
+   for (i = 0; i < number_of_params; i++)
+   {
+      if (s_imp_drh->api.ads_get_bind_param_info(s_stmt, i, &bind_info))
       {
-      if( s_imp_drh->api.ads_get_bind_param_info( s_stmt, i, &bind_info ) )
-         {
          // We don't free bind_info.name as it's not allocated
          // if ( bind_info.name ) {free ( bind_info.name );}
 
-         if( bind_info.input_value.is_null )
-            {
-            free( bind_info.input_value.is_null );
-            }
-         if( bind_info.input_value.length )
-            {
-            free( bind_info.input_value.length );
-            }
-         if( bind_info.input_value.buffer )
-            {
-            free( bind_info.input_value.buffer );
-            }
+         if (bind_info.input_value.is_null)
+         {
+            free(bind_info.input_value.is_null);
+         }
+         if (bind_info.input_value.length)
+         {
+            free(bind_info.input_value.length);
+         }
+         if (bind_info.input_value.buffer)
+         {
+            free(bind_info.input_value.buffer);
+         }
 
-         if( bind_info.output_value.is_null )
-            {
-            free( bind_info.output_value.is_null );
-            }
-         if( bind_info.output_value.length )
-            {
-            free( bind_info.output_value.length );
-            }
-         if( bind_info.output_value.buffer )
-            {
-            free( bind_info.output_value.buffer );
-            }
+         if (bind_info.output_value.is_null)
+         {
+            free(bind_info.output_value.is_null);
+         }
+         if (bind_info.output_value.length)
+         {
+            free(bind_info.output_value.length);
+         }
+         if (bind_info.output_value.buffer)
+         {
+            free(bind_info.output_value.buffer);
          }
       }
-
-   s_imp_drh->api.ads_free_stmt( s_stmt );
-
-   return(  Qnil  );
    }
+
+   s_imp_drh->api.ads_free_stmt(s_stmt);
+
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -1057,21 +1054,20 @@ static_AdvantageInterface_ads_free_stmt( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_reset( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_reset(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
-   result = s_imp_drh->api.ads_reset( s_stmt );
+   result = s_imp_drh->api.ads_reset(s_stmt);
 
-   return( INT2FIX( result ) );
-   }
-
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -1088,24 +1084,24 @@ static_AdvantageInterface_ads_reset( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_execute( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_execute(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
    //printf(  "CEXT s_ads_stmt: %d \n", s_stmt );
-   result = s_imp_drh->api.ads_execute( s_stmt );
+   result = s_imp_drh->api.ads_execute(s_stmt);
    /*if (  result != AE_SUCCESS  )
       return ( 0 );
    else
       return ( 1 );*/
-   return( INT2FIX( result ) );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -1123,20 +1119,20 @@ static_AdvantageInterface_ads_execute( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_affected_rows( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_affected_rows(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
-   result = s_imp_drh->api.ads_affected_rows( s_stmt );
+   result = s_imp_drh->api.ads_affected_rows(s_stmt);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -1161,36 +1157,36 @@ static_AdvantageInterface_ads_affected_rows( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_describe_bind_param( VALUE imp_drh, VALUE ads_stmt, VALUE index )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_describe_bind_param(VALUE imp_drh, VALUE ads_stmt, VALUE index)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
-   a_ads_bind_param* s_ads_bind_param;
+   a_ads_bind_param *s_ads_bind_param;
    UNSIGNED32 result;
    UNSIGNED32 s_index;
    VALUE tdata;
    VALUE multi_result;
 
-   s_ads_bind_param = malloc( sizeof( a_ads_bind_param ) );
-   memset(  s_ads_bind_param, 0, sizeof( a_ads_bind_param )  );
+   s_ads_bind_param = malloc(sizeof(a_ads_bind_param));
+   memset(s_ads_bind_param, 0, sizeof(a_ads_bind_param));
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   s_stmt = NUM2ULONG( ads_stmt );
-   s_index = NUM2INT( index );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   s_stmt = NUM2ULONG(ads_stmt);
+   s_index = NUM2INT(index);
 
-   result = s_imp_drh->api.ads_describe_bind_param( s_stmt, s_index, s_ads_bind_param );
+   result = s_imp_drh->api.ads_describe_bind_param(s_stmt, s_index, s_ads_bind_param);
 
    //FIXME handle failed result
 
-   multi_result = rb_ary_new(  );
+   multi_result = rb_ary_new();
 
-   rb_ary_push( multi_result, INT2FIX( result ) );
+   rb_ary_push(multi_result, INT2FIX(result));
 
-   tdata = Data_Wrap_Struct( cA_ads_bind_param, 0, 0, s_ads_bind_param );
-   rb_ary_push( multi_result, tdata );
+   tdata = Data_Wrap_Struct(cA_ads_bind_param, 0, 0, s_ads_bind_param);
+   rb_ary_push(multi_result, tdata);
 
-   return(  multi_result  );
-   }
+   return (multi_result);
+}
 
 /*
  * call-seq:
@@ -1209,24 +1205,24 @@ static_AdvantageInterface_ads_describe_bind_param( VALUE imp_drh, VALUE ads_stmt
  *
  */
 static VALUE
-static_AdvantageInterface_ads_bind_param( VALUE imp_drh, VALUE ads_stmt, VALUE index, VALUE ads_bind_param  )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_bind_param(VALUE imp_drh, VALUE ads_stmt, VALUE index, VALUE ads_bind_param)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
-   a_ads_bind_param* s_ads_bind_param;
+   a_ads_bind_param *s_ads_bind_param;
    UNSIGNED32 result;
    UNSIGNED32 s_index;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
-   Data_Get_Struct( ads_bind_param, a_ads_bind_param, s_ads_bind_param );
-   s_index = NUM2INT( index );
+   s_stmt = NUM2ULONG(ads_stmt);
+   Data_Get_Struct(ads_bind_param, a_ads_bind_param, s_ads_bind_param);
+   s_index = NUM2INT(index);
 
-   result = s_imp_drh->api.ads_bind_param( s_stmt, s_index, s_ads_bind_param );
+   result = s_imp_drh->api.ads_bind_param(s_stmt, s_index, s_ads_bind_param);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -1248,9 +1244,9 @@ static_AdvantageInterface_ads_bind_param( VALUE imp_drh, VALUE ads_stmt, VALUE i
  *
  */
 static VALUE
-static_AdvantageInterface_ads_get_bind_param_info( VALUE imp_drh, VALUE ads_stmt, VALUE index )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_get_bind_param_info(VALUE imp_drh, VALUE ads_stmt, VALUE index)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    a_ads_bind_param_info s_ads_bind_param_info;
    UNSIGNED32 result;
@@ -1258,23 +1254,23 @@ static_AdvantageInterface_ads_get_bind_param_info( VALUE imp_drh, VALUE ads_stmt
    VALUE tdata;
    VALUE multi_result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   s_stmt = NUM2ULONG( ads_stmt );
-   s_index = NUM2INT( index );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   s_stmt = NUM2ULONG(ads_stmt);
+   s_index = NUM2INT(index);
 
-   result = s_imp_drh->api.ads_get_bind_param_info( s_stmt, s_index, &s_ads_bind_param_info );
+   result = s_imp_drh->api.ads_get_bind_param_info(s_stmt, s_index, &s_ads_bind_param_info);
 
    //FIXME handle failed result
-   multi_result = rb_ary_new(  );
+   multi_result = rb_ary_new();
 
-   rb_ary_push( multi_result, INT2FIX( result ) );
+   rb_ary_push(multi_result, INT2FIX(result));
 
    // FIXME: Is this safe to be on the stack?
-   tdata = Data_Wrap_Struct( cA_ads_bind_param_info, 0, 0, &s_ads_bind_param_info );
-   rb_ary_push( multi_result, tdata );
+   tdata = Data_Wrap_Struct(cA_ads_bind_param_info, 0, 0, &s_ads_bind_param_info);
+   rb_ary_push(multi_result, tdata);
 
-   return(  multi_result  );
-   }
+   return (multi_result);
+}
 
 /*
  * call-seq:
@@ -1295,20 +1291,20 @@ static_AdvantageInterface_ads_get_bind_param_info( VALUE imp_drh, VALUE ads_stmt
  *
  */
 static VALUE
-static_AdvantageInterface_ads_num_params( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_num_params(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
-   result = s_imp_drh->api.ads_num_params( s_stmt );
+   result = s_imp_drh->api.ads_num_params(s_stmt);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -1329,20 +1325,20 @@ static_AdvantageInterface_ads_num_params( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_get_next_result( VALUE imp_drh, VALUE ads_stmt )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_get_next_result(VALUE imp_drh, VALUE ads_stmt)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
+   s_stmt = NUM2ULONG(ads_stmt);
 
-   result = s_imp_drh->api.ads_get_next_result( s_stmt );
+   result = s_imp_drh->api.ads_get_next_result(s_stmt);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -1363,21 +1359,21 @@ static_AdvantageInterface_ads_get_next_result( VALUE imp_drh, VALUE ads_stmt )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_fetch_absolute( VALUE imp_drh, VALUE ads_stmt, VALUE offset )
-   {
-   imp_drh_st* s_imp_drh;
+static_AdvantageInterface_ads_fetch_absolute(VALUE imp_drh, VALUE ads_stmt, VALUE offset)
+{
+   imp_drh_st *s_imp_drh;
    ADSHANDLE s_stmt;
-   UNSIGNED32  s_offset;
+   UNSIGNED32 s_offset;
    UNSIGNED32 result;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG( ads_stmt );
-   s_offset = NUM2INT( offset );
-   result = s_imp_drh->api.ads_fetch_absolute( s_stmt, s_offset );
+   s_stmt = NUM2ULONG(ads_stmt);
+   s_offset = NUM2INT(offset);
+   result = s_imp_drh->api.ads_fetch_absolute(s_stmt, s_offset);
 
-   return(  INT2FIX( result )  );
-   }
+   return (INT2FIX(result));
+}
 
 /*
  * call-seq:
@@ -1394,23 +1390,23 @@ static_AdvantageInterface_ads_fetch_absolute( VALUE imp_drh, VALUE ads_stmt, VAL
  *
  */
 static VALUE
-static_AdvantageInterface_ads_sqlstate( VALUE imp_drh, VALUE ads_conn )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_sqlstate(VALUE imp_drh, VALUE ads_conn)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
    UNSIGNED32 result;
-   char   s_buffer[255];
+   char s_buffer[255];
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   result = s_imp_drh->api.ads_sqlstate( s_ads_conn, ( UNSIGNED8* )s_buffer, sizeof( s_buffer ) );
+   result = s_imp_drh->api.ads_sqlstate(s_ads_conn, (UNSIGNED8 *)s_buffer, sizeof(s_buffer));
 
-   if( result )
-      return(  rb_str_new( s_buffer, strlen( s_buffer ) ) );
+   if (result)
+      return (rb_str_new(s_buffer, strlen(s_buffer)));
    else
       return Qnil;
-   }
+}
 
 /*
  * call-seq:
@@ -1427,18 +1423,18 @@ static_AdvantageInterface_ads_sqlstate( VALUE imp_drh, VALUE ads_conn )
  *
  */
 static VALUE
-static_AdvantageInterface_ads_clear_error( VALUE imp_drh, VALUE ads_conn )
-   {
-   imp_drh_st* s_imp_drh;
-   a_ads_connection* s_ads_conn;
+static_AdvantageInterface_ads_clear_error(VALUE imp_drh, VALUE ads_conn)
+{
+   imp_drh_st *s_imp_drh;
+   a_ads_connection *s_ads_conn;
 
-   Data_Get_Struct( imp_drh, imp_drh_st, s_imp_drh );
-   Data_Get_Struct( ads_conn, a_ads_connection, s_ads_conn );
+   Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
+   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
 
-   s_imp_drh->api.ads_clear_error( s_ads_conn );
+   s_imp_drh->api.ads_clear_error(s_ads_conn);
 
-   return(  Qnil  );
-   }
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -1454,12 +1450,12 @@ static_AdvantageInterface_ads_clear_error( VALUE imp_drh, VALUE ads_conn )
  *
  */
 static VALUE
-static_Bind_get_name( VALUE bind )
-   {
-   a_ads_bind_param* s_bind;
-   Data_Get_Struct( bind, a_ads_bind_param, s_bind );
-   return( rb_str_new2( ( char* )s_bind->name ) );
-   }
+static_Bind_get_name(VALUE bind)
+{
+   a_ads_bind_param *s_bind;
+   Data_Get_Struct(bind, a_ads_bind_param, s_bind);
+   return (rb_str_new2((char *)s_bind->name));
+}
 
 /*
  * call-seq:
@@ -1496,127 +1492,127 @@ static_Bind_get_name( VALUE bind )
  *  - <tt>nil</tt>.
  */
 static VALUE
-static_Bind_set_value( VALUE bind, VALUE val )
-   {
-   a_ads_bind_param* s_bind;
+static_Bind_set_value(VALUE bind, VALUE val)
+{
+   a_ads_bind_param *s_bind;
    int length;
 
-   Data_Get_Struct( bind, a_ads_bind_param, s_bind );
+   Data_Get_Struct(bind, a_ads_bind_param, s_bind);
 
    // FIXME: use Ruby's allocation routines?
-   s_bind->value.is_null = malloc( sizeof( UNSIGNED32 ) );
+   s_bind->value.is_null = malloc(sizeof(UNSIGNED32));
    *s_bind->value.is_null = 0;
 
-   if( s_bind->direction == DD_INPUT )
+   if (s_bind->direction == DD_INPUT)
+   {
+      switch (TYPE(val))
       {
-      switch( TYPE( val ) )
+      case T_STRING:
+         s_bind->value.length = malloc(sizeof(size_t));
+         length = RSTRING_LEN(val);
+         *s_bind->value.length = length;
+         s_bind->value.buffer = malloc(length);
+         memcpy(s_bind->value.buffer, RSTRING_PTR(val), length);
+         s_bind->value.type = A_STRING;
+         break;
+      case T_FIXNUM:
+         if (sizeof(void *) == 4) //32-bit
          {
-         case T_STRING:
-            s_bind->value.length  = malloc( sizeof( size_t ) );
-            length = RSTRING_LEN( val );
-            *s_bind->value.length = length;
-            s_bind->value.buffer = malloc( length );
-            memcpy( s_bind->value.buffer, RSTRING_PTR( val ), length );
-            s_bind->value.type = A_STRING;
-            break;
-         case T_FIXNUM:
-            if( sizeof( void* ) == 4 ) //32-bit
-               {
-               s_bind->value.length  = malloc( sizeof( size_t ) );
-               s_bind->value.buffer = malloc( sizeof( int ) );
-               *( ( int* )s_bind->value.buffer ) = FIX2INT( val );
-               s_bind->value.type = A_VAL32;
-               length = 1;
-               *s_bind->value.length = length;
-               }
-            else //64-bit
-               {
-               s_bind->value.length  = malloc( sizeof( size_t ) );
-               s_bind->value.buffer = malloc( sizeof( long ) );
-               *( ( long* )s_bind->value.buffer ) = FIX2LONG( val );
-               s_bind->value.type = A_VAL64;
-               length = 1;
-               *s_bind->value.length = length;
-               }
-            break;
-         case T_BIGNUM:
-            s_bind->value.length  = malloc( sizeof( size_t ) );
-            s_bind->value.buffer = malloc( sizeof( LONG_LONG ) );
-            *( ( LONG_LONG* )s_bind->value.buffer ) = rb_num2ll( val );
-            s_bind->value.type = A_VAL64;
-            length = 1;
-            *s_bind->value.length = length;
-            break;
-         case T_FLOAT:
-            s_bind->value.length  = malloc( sizeof( size_t ) );
-            s_bind->value.buffer = malloc( sizeof( double ) );
-            *( ( double* )s_bind->value.buffer ) = NUM2DBL( val );
-            s_bind->value.type = A_DOUBLE;
-            length = 1;
-            *s_bind->value.length = length;
-            break;
-         case T_FALSE:
-            s_bind->value.length  = malloc( sizeof( size_t ) );
-            s_bind->value.buffer = malloc( sizeof( short ) );
-            *( ( int* )s_bind->value.buffer ) = ADS_FALSE;
-            s_bind->value.type = A_UVAL16;
-            length = 1;
-            *s_bind->value.length = length;
-            break;
-         case T_TRUE:
-            s_bind->value.length  = malloc( sizeof( size_t ) );
-            s_bind->value.buffer = malloc( sizeof( short ) );
-            *( ( int* )s_bind->value.buffer ) = ADS_TRUE;
-            s_bind->value.type = A_UVAL16;
-            length = 1;
-            *s_bind->value.length = length;
-            break;
-         case T_NIL:
-            s_bind->value.length  = malloc( sizeof( size_t ) );
-            *s_bind->value.is_null = 1;
-            s_bind->value.buffer = malloc( sizeof( int ) );
+            s_bind->value.length = malloc(sizeof(size_t));
+            s_bind->value.buffer = malloc(sizeof(int));
+            *((int *)s_bind->value.buffer) = FIX2INT(val);
             s_bind->value.type = A_VAL32;
             length = 1;
             *s_bind->value.length = length;
-            break;
-         default:
-            rb_raise( rb_eTypeError, "Cannot convert type. Must be STRING, FIXNUM, BIGNUM, FLOAT, or NIL" );
-            break;
          }
-      }
-   else
-      {
-      switch( s_bind->value.type )
+         else //64-bit
          {
-         case A_STRING:
-            s_bind->value.buffer = malloc( s_bind->value.buffer_size );
-            break;
-         case A_DOUBLE:
-            s_bind->value.buffer = malloc( sizeof( float ) );
-            break;
-         case A_VAL64:
-         case A_UVAL64:
-            s_bind->value.buffer = malloc( sizeof( LONG_LONG ) );
-            break;
-         case A_VAL32:
-         case A_UVAL32:
-            s_bind->value.buffer = malloc( sizeof( int ) );
-            break;
-         case A_VAL16:
-         case A_UVAL16:
-            s_bind->value.buffer = malloc( sizeof( short ) );
-            break;
-         case A_VAL8:
-         case A_UVAL8:
-            s_bind->value.buffer = malloc( sizeof( char ) );
-            break;
-         default:
-            rb_raise( rb_eTypeError, "Type unknown" );
-            break;
+            s_bind->value.length = malloc(sizeof(size_t));
+            s_bind->value.buffer = malloc(sizeof(long));
+            *((long *)s_bind->value.buffer) = FIX2LONG(val);
+            s_bind->value.type = A_VAL64;
+            length = 1;
+            *s_bind->value.length = length;
          }
+         break;
+      case T_BIGNUM:
+         s_bind->value.length = malloc(sizeof(size_t));
+         s_bind->value.buffer = malloc(sizeof(LONG_LONG));
+         *((LONG_LONG *)s_bind->value.buffer) = rb_num2ll(val);
+         s_bind->value.type = A_VAL64;
+         length = 1;
+         *s_bind->value.length = length;
+         break;
+      case T_FLOAT:
+         s_bind->value.length = malloc(sizeof(size_t));
+         s_bind->value.buffer = malloc(sizeof(double));
+         *((double *)s_bind->value.buffer) = NUM2DBL(val);
+         s_bind->value.type = A_DOUBLE;
+         length = 1;
+         *s_bind->value.length = length;
+         break;
+      case T_FALSE:
+         s_bind->value.length = malloc(sizeof(size_t));
+         s_bind->value.buffer = malloc(sizeof(short));
+         *((int *)s_bind->value.buffer) = ADS_FALSE;
+         s_bind->value.type = A_UVAL16;
+         length = 1;
+         *s_bind->value.length = length;
+         break;
+      case T_TRUE:
+         s_bind->value.length = malloc(sizeof(size_t));
+         s_bind->value.buffer = malloc(sizeof(short));
+         *((int *)s_bind->value.buffer) = ADS_TRUE;
+         s_bind->value.type = A_UVAL16;
+         length = 1;
+         *s_bind->value.length = length;
+         break;
+      case T_NIL:
+         s_bind->value.length = malloc(sizeof(size_t));
+         *s_bind->value.is_null = 1;
+         s_bind->value.buffer = malloc(sizeof(int));
+         s_bind->value.type = A_VAL32;
+         length = 1;
+         *s_bind->value.length = length;
+         break;
+      default:
+         rb_raise(rb_eTypeError, "Cannot convert type. Must be STRING, FIXNUM, BIGNUM, FLOAT, or NIL");
+         break;
       }
-   return( Qnil );
    }
+   else
+   {
+      switch (s_bind->value.type)
+      {
+      case A_STRING:
+         s_bind->value.buffer = malloc(s_bind->value.buffer_size);
+         break;
+      case A_DOUBLE:
+         s_bind->value.buffer = malloc(sizeof(float));
+         break;
+      case A_VAL64:
+      case A_UVAL64:
+         s_bind->value.buffer = malloc(sizeof(LONG_LONG));
+         break;
+      case A_VAL32:
+      case A_UVAL32:
+         s_bind->value.buffer = malloc(sizeof(int));
+         break;
+      case A_VAL16:
+      case A_UVAL16:
+         s_bind->value.buffer = malloc(sizeof(short));
+         break;
+      case A_VAL8:
+      case A_UVAL8:
+         s_bind->value.buffer = malloc(sizeof(char));
+         break;
+      default:
+         rb_raise(rb_eTypeError, "Type unknown");
+         break;
+      }
+   }
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -1633,16 +1629,16 @@ static_Bind_set_value( VALUE bind, VALUE val )
  *
  */
 static VALUE
-static_Bind_set_direction( VALUE bind, VALUE direction )
-   {
-   a_ads_bind_param* s_bind;
+static_Bind_set_direction(VALUE bind, VALUE direction)
+{
+   a_ads_bind_param *s_bind;
 
-   Data_Get_Struct( bind, a_ads_bind_param, s_bind );
+   Data_Get_Struct(bind, a_ads_bind_param, s_bind);
 
-   s_bind->direction = NUM2CHR( direction );
+   s_bind->direction = NUM2CHR(direction);
 
-   return( Qnil );
-   }
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -1660,16 +1656,16 @@ static_Bind_set_direction( VALUE bind, VALUE direction )
  *
  */
 static VALUE
-static_Bind_set_buffer_size( VALUE bind, VALUE size )
-   {
-   a_ads_bind_param* s_bind;
+static_Bind_set_buffer_size(VALUE bind, VALUE size)
+{
+   a_ads_bind_param *s_bind;
 
-   Data_Get_Struct( bind, a_ads_bind_param, s_bind );
+   Data_Get_Struct(bind, a_ads_bind_param, s_bind);
 
-   s_bind->value.buffer_size = NUM2INT( size );
+   s_bind->value.buffer_size = NUM2INT(size);
 
-   return( Qnil );
-   }
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -1685,13 +1681,13 @@ static_Bind_set_buffer_size( VALUE bind, VALUE size )
  *
  */
 static VALUE
-static_Bind_get_direction( VALUE bind )
-   {
-   a_ads_bind_param* s_bind;
-   Data_Get_Struct( bind, a_ads_bind_param, s_bind );
+static_Bind_get_direction(VALUE bind)
+{
+   a_ads_bind_param *s_bind;
+   Data_Get_Struct(bind, a_ads_bind_param, s_bind);
 
-   return( CHR2FIX( s_bind->direction ) );
-   }
+   return (CHR2FIX(s_bind->direction));
+}
 
 /*
  * call-seq:
@@ -1707,20 +1703,20 @@ static_Bind_get_direction( VALUE bind )
  *
  */
 static VALUE
-static_Bind_finish( VALUE bind )
-   {
-   a_ads_bind_param* s_bind;
+static_Bind_finish(VALUE bind)
+{
+   a_ads_bind_param *s_bind;
 
-   Data_Get_Struct( bind, a_ads_bind_param, s_bind );
+   Data_Get_Struct(bind, a_ads_bind_param, s_bind);
 
    // FIXME: use Ruby's allocation routines?
-   if( s_bind )
-      {
-      free( s_bind );
-      };
+   if (s_bind)
+   {
+      free(s_bind);
+   };
 
-   return( Qnil );
-   }
+   return (Qnil);
+}
 
 /*
  * call-seq:
@@ -1736,13 +1732,13 @@ static_Bind_finish( VALUE bind )
  *
  */
 static VALUE
-static_Bind_get_info_direction( VALUE bind )
-   {
-   a_ads_bind_param_info* s_bind;
-   Data_Get_Struct( bind, a_ads_bind_param_info, s_bind );
+static_Bind_get_info_direction(VALUE bind)
+{
+   a_ads_bind_param_info *s_bind;
+   Data_Get_Struct(bind, a_ads_bind_param_info, s_bind);
 
-   return( CHR2FIX( s_bind->direction ) );
-   }
+   return (CHR2FIX(s_bind->direction));
+}
 
 /*
  * call-seq:
@@ -1758,87 +1754,83 @@ static_Bind_get_info_direction( VALUE bind )
  *
  */
 static VALUE
-static_Bind_get_info_output( VALUE bind )
-   {
-   a_ads_bind_param_info* s_bind;
-   Data_Get_Struct( bind, a_ads_bind_param_info, s_bind );
-   return( C2RB( &s_bind->output_value ) );
-   }
+static_Bind_get_info_output(VALUE bind)
+{
+   a_ads_bind_param_info *s_bind;
+   Data_Get_Struct(bind, a_ads_bind_param_info, s_bind);
+   return (C2RB(&s_bind->output_value));
+}
 
 /*
  *
  */
-void Init_advantage(  )
-   {
+void Init_advantage()
+{
    // Define top leve 'Advantage' module
-   mAdvantage = rb_define_module(  "Advantage"  );
+   mAdvantage = rb_define_module("Advantage");
 
    // Define a sub-module name 'API' under Advantage.
    // In Ruby, this is accessed as Advantage::API
-   mAPI = rb_define_module_under(  mAdvantage, "API"  );
+   mAPI = rb_define_module_under(mAdvantage, "API");
 
    // Define ads interface functions
-   rb_define_module_function(  mAPI, "ads_initialize_interface", static_API_ads_initialize_interface, 1  );
-   rb_define_module_function(  mAPI, "ads_finalize_interface", static_API_ads_finalize_interface, 1  );
-   rb_define_const( mAPI, "VERSION", rb_str_new2( VERSION ) );
-
+   rb_define_module_function(mAPI, "ads_initialize_interface", static_API_ads_initialize_interface, 1);
+   rb_define_module_function(mAPI, "ads_finalize_interface", static_API_ads_finalize_interface, 1);
+   rb_define_const(mAPI, "VERSION", rb_str_new2(VERSION));
 
    // Define interface classes under the Advantage module
-   cAdvantageInterface = rb_define_class_under(  mAdvantage, "AdvantageInterface", rb_cObject );
-   rb_define_alloc_func( cAdvantageInterface, static_AdvantageInterface_alloc );
+   cAdvantageInterface = rb_define_class_under(mAdvantage, "AdvantageInterface", rb_cObject);
+   rb_define_alloc_func(cAdvantageInterface, static_AdvantageInterface_alloc);
 
    // Define all of the DBCAPI functions as methods under an interface instance
-   rb_define_method( cAdvantageInterface, "ads_init", static_AdvantageInterface_ads_init, 0 );
-   rb_define_method( cAdvantageInterface, "ads_new_connection", static_AdvantageInterface_ads_new_connection, 0 );
-   rb_define_method( cAdvantageInterface, "ads_client_version", static_AdvantageInterface_ads_client_version, 0 );
-   rb_define_method( cAdvantageInterface, "ads_connect", static_AdvantageInterface_ads_connect, 2 );
-   rb_define_method( cAdvantageInterface, "ads_disconnect", static_AdvantageInterface_ads_disconnect, 1 );
-   rb_define_method( cAdvantageInterface, "ads_free_connection", static_AdvantageInterface_ads_free_connection, 1 );
-   rb_define_method( cAdvantageInterface, "ads_fini", static_AdvantageInterface_ads_fini, 0 );
-   rb_define_method( cAdvantageInterface, "ads_error", static_AdvantageInterface_ads_error, 1 );
-   rb_define_method( cAdvantageInterface, "ads_execute_immediate", static_AdvantageInterface_ads_execute_immediate, 2 );
-   rb_define_method( cAdvantageInterface, "ads_execute_direct", static_AdvantageInterface_ads_execute_direct, 2 );
-   rb_define_method( cAdvantageInterface, "ads_num_cols", static_AdvantageInterface_ads_num_cols, 1 );
-   rb_define_method( cAdvantageInterface, "ads_num_rows", static_AdvantageInterface_ads_num_rows, 1 );
-   rb_define_method( cAdvantageInterface, "ads_get_column", static_AdvantageInterface_ads_get_column, 2 );
-   rb_define_method( cAdvantageInterface, "ads_fetch_next", static_AdvantageInterface_ads_fetch_next, 1 );
-   rb_define_method( cAdvantageInterface, "ads_get_column_info", static_AdvantageInterface_ads_get_column_info, 2 );
-   rb_define_method( cAdvantageInterface, "AdsBeginTransaction", static_AdvantageInterface_AdsBeginTransaction, 1 );
-   rb_define_method( cAdvantageInterface, "ads_commit", static_AdvantageInterface_ads_commit, 1 );
-   rb_define_method( cAdvantageInterface, "ads_rollback", static_AdvantageInterface_ads_rollback, 1 );
-   rb_define_method( cAdvantageInterface, "ads_prepare", static_AdvantageInterface_ads_prepare, 2 );
-   rb_define_method( cAdvantageInterface, "ads_free_stmt", static_AdvantageInterface_ads_free_stmt, 1 );
-   rb_define_method( cAdvantageInterface, "ads_reset", static_AdvantageInterface_ads_reset, 1 );
-   rb_define_method( cAdvantageInterface, "ads_execute", static_AdvantageInterface_ads_execute, 1 );
-   rb_define_method( cAdvantageInterface, "ads_affected_rows", static_AdvantageInterface_ads_affected_rows, 1 );
-   rb_define_method( cAdvantageInterface, "ads_describe_bind_param", static_AdvantageInterface_ads_describe_bind_param, 2 );
-   rb_define_method( cAdvantageInterface, "ads_bind_param", static_AdvantageInterface_ads_bind_param, 3 );
-   rb_define_method( cAdvantageInterface, "ads_get_bind_param_info", static_AdvantageInterface_ads_get_bind_param_info, 2 );
-   rb_define_method( cAdvantageInterface, "ads_num_params", static_AdvantageInterface_ads_num_params, 1 );
-   rb_define_method( cAdvantageInterface, "ads_get_next_result", static_AdvantageInterface_ads_get_next_result, 1 );
-   rb_define_method( cAdvantageInterface, "ads_fetch_absolute", static_AdvantageInterface_ads_fetch_absolute, 2 );
-   rb_define_method( cAdvantageInterface, "ads_sqlstate", static_AdvantageInterface_ads_sqlstate, 1 );
-   rb_define_method( cAdvantageInterface, "ads_clear_error", static_AdvantageInterface_ads_clear_error, 1 );
+   rb_define_method(cAdvantageInterface, "ads_init", static_AdvantageInterface_ads_init, 0);
+   rb_define_method(cAdvantageInterface, "ads_new_connection", static_AdvantageInterface_ads_new_connection, 0);
+   rb_define_method(cAdvantageInterface, "ads_client_version", static_AdvantageInterface_ads_client_version, 0);
+   rb_define_method(cAdvantageInterface, "ads_connect", static_AdvantageInterface_ads_connect, 2);
+   rb_define_method(cAdvantageInterface, "ads_disconnect", static_AdvantageInterface_ads_disconnect, 1);
+   rb_define_method(cAdvantageInterface, "ads_free_connection", static_AdvantageInterface_ads_free_connection, 1);
+   rb_define_method(cAdvantageInterface, "ads_fini", static_AdvantageInterface_ads_fini, 0);
+   rb_define_method(cAdvantageInterface, "ads_error", static_AdvantageInterface_ads_error, 1);
+   rb_define_method(cAdvantageInterface, "ads_execute_immediate", static_AdvantageInterface_ads_execute_immediate, 2);
+   rb_define_method(cAdvantageInterface, "ads_execute_direct", static_AdvantageInterface_ads_execute_direct, 2);
+   rb_define_method(cAdvantageInterface, "ads_num_cols", static_AdvantageInterface_ads_num_cols, 1);
+   rb_define_method(cAdvantageInterface, "ads_num_rows", static_AdvantageInterface_ads_num_rows, 1);
+   rb_define_method(cAdvantageInterface, "ads_get_column", static_AdvantageInterface_ads_get_column, 2);
+   rb_define_method(cAdvantageInterface, "ads_fetch_next", static_AdvantageInterface_ads_fetch_next, 1);
+   rb_define_method(cAdvantageInterface, "ads_get_column_info", static_AdvantageInterface_ads_get_column_info, 2);
+   rb_define_method(cAdvantageInterface, "AdsBeginTransaction", static_AdvantageInterface_AdsBeginTransaction, 1);
+   rb_define_method(cAdvantageInterface, "ads_commit", static_AdvantageInterface_ads_commit, 1);
+   rb_define_method(cAdvantageInterface, "ads_rollback", static_AdvantageInterface_ads_rollback, 1);
+   rb_define_method(cAdvantageInterface, "ads_prepare", static_AdvantageInterface_ads_prepare, 2);
+   rb_define_method(cAdvantageInterface, "ads_free_stmt", static_AdvantageInterface_ads_free_stmt, 1);
+   rb_define_method(cAdvantageInterface, "ads_reset", static_AdvantageInterface_ads_reset, 1);
+   rb_define_method(cAdvantageInterface, "ads_execute", static_AdvantageInterface_ads_execute, 1);
+   rb_define_method(cAdvantageInterface, "ads_affected_rows", static_AdvantageInterface_ads_affected_rows, 1);
+   rb_define_method(cAdvantageInterface, "ads_describe_bind_param", static_AdvantageInterface_ads_describe_bind_param, 2);
+   rb_define_method(cAdvantageInterface, "ads_bind_param", static_AdvantageInterface_ads_bind_param, 3);
+   rb_define_method(cAdvantageInterface, "ads_get_bind_param_info", static_AdvantageInterface_ads_get_bind_param_info, 2);
+   rb_define_method(cAdvantageInterface, "ads_num_params", static_AdvantageInterface_ads_num_params, 1);
+   rb_define_method(cAdvantageInterface, "ads_get_next_result", static_AdvantageInterface_ads_get_next_result, 1);
+   rb_define_method(cAdvantageInterface, "ads_fetch_absolute", static_AdvantageInterface_ads_fetch_absolute, 2);
+   rb_define_method(cAdvantageInterface, "ads_sqlstate", static_AdvantageInterface_ads_sqlstate, 1);
+   rb_define_method(cAdvantageInterface, "ads_clear_error", static_AdvantageInterface_ads_clear_error, 1);
 
    // Define classes for accessing structures under Advantage module
-   cA_ads_connection = rb_define_class_under ( mAdvantage, "a_ads_connection", rb_cObject );
-   cA_ads_data_value = rb_define_class_under ( mAdvantage, "a_ads_data_value", rb_cObject );
+   cA_ads_connection = rb_define_class_under(mAdvantage, "a_ads_connection", rb_cObject);
+   cA_ads_data_value = rb_define_class_under(mAdvantage, "a_ads_data_value", rb_cObject);
    //cA_ads_stmt = rb_define_class_under ( mAdvantage, "ADSHANDLE", rb_cObject );
-   cA_ads_bind_param = rb_define_class_under ( mAdvantage, "a_ads_bind_param", rb_cObject );
-   cA_ads_bind_param_info = rb_define_class_under ( mAdvantage, "a_ads_bind_param_info", rb_cObject );
-
+   cA_ads_bind_param = rb_define_class_under(mAdvantage, "a_ads_bind_param", rb_cObject);
+   cA_ads_bind_param_info = rb_define_class_under(mAdvantage, "a_ads_bind_param_info", rb_cObject);
 
    // Define methods for obtaining bind_parameter fields
-   rb_define_method( cA_ads_bind_param, "get_name", static_Bind_get_name, 0 );
-   rb_define_method( cA_ads_bind_param, "set_value", static_Bind_set_value, 1 );
-   rb_define_method( cA_ads_bind_param, "get_direction", static_Bind_get_direction, 0 );
-   rb_define_method( cA_ads_bind_param, "set_direction", static_Bind_set_direction, 1 );
-   rb_define_method( cA_ads_bind_param, "set_buffer_size", static_Bind_set_buffer_size, 1 );
-   rb_define_method( cA_ads_bind_param, "finish", static_Bind_finish, 0 );
+   rb_define_method(cA_ads_bind_param, "get_name", static_Bind_get_name, 0);
+   rb_define_method(cA_ads_bind_param, "set_value", static_Bind_set_value, 1);
+   rb_define_method(cA_ads_bind_param, "get_direction", static_Bind_get_direction, 0);
+   rb_define_method(cA_ads_bind_param, "set_direction", static_Bind_set_direction, 1);
+   rb_define_method(cA_ads_bind_param, "set_buffer_size", static_Bind_set_buffer_size, 1);
+   rb_define_method(cA_ads_bind_param, "finish", static_Bind_finish, 0);
 
    // Define methods for obtaining bind_parameter_info fields
-   rb_define_method( cA_ads_bind_param_info, "get_direction", static_Bind_get_info_direction, 0 );
-   rb_define_method( cA_ads_bind_param_info, "get_output", static_Bind_get_info_output, 0 );
-   }
-
-
+   rb_define_method(cA_ads_bind_param_info, "get_direction", static_Bind_get_info_direction, 0);
+   rb_define_method(cA_ads_bind_param_info, "get_output", static_Bind_get_info_output, 0);
+}
