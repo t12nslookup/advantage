@@ -21,7 +21,7 @@
 #include "ruby.h"
 #include "adscapidll.h"
 
-const char *VERSION = "0.1.2";
+const char *VERSION = "0.1.3";
 
 typedef struct imp_drh_st
 {
