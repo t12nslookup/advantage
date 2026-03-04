@@ -154,7 +154,7 @@ typedef loff_t SIGNED64;
 #define RUBY_EXTERN extern
 #define STATIC static
 
-#if defined(ASANT) || defined(ADS_NT) || defined(ADS_WIN9X) || (defined(x64) && !defined(ADS_LINUX))
+#if defined(ASANT) || defined(ADS_NT) || defined(ADS_WIN9X) || (defined(x64) && !defined(ADS_LINUX)) || (defined(_WIN64) && !defined(ADS_LINUX))
 #define ENTRYPOINT WINAPI
 #elif defined(ASANLM) || defined(ADS_LINUX) || defined(NLM)
 #define ENTRYPOINT
