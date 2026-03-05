@@ -21,13 +21,19 @@
 #include "ruby.h"
 #include "adscapidll.h"
 
-const char *VERSION = "0.1.3";
+const char *VERSION = "0.1.4";
 
 typedef struct imp_drh_st
 {
    AdvantageInterface api;
    void *adscapi_context;
 } imp_drh_st;
+
+static const rb_data_type_t ads_connection_type = {
+   "a_ads_connection",
+   { 0, 0, 0 },
+   0, 0, RUBY_TYPED_FREE_IMMEDIATELY
+};
 
 // Defining the Ruby Modules
 static VALUE mAdvantage;
@@ -334,7 +340,7 @@ static_AdvantageInterface_ads_new_connection(VALUE imp_drh)
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    ptr = s_imp_drh->api.ads_new_connection();
 
-   tdata = Data_Wrap_Struct(cA_ads_connection, 0, 0, ptr);
+   tdata = TypedData_Wrap_Struct(cA_ads_connection, &ads_connection_type, ptr);
 
    return (tdata);
 }
@@ -396,7 +402,7 @@ static_AdvantageInterface_ads_connect(VALUE imp_drh, VALUE ads_conn, VALUE str)
    UNSIGNED32 result;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    s_str = StringValueCStr(str);
 
@@ -429,7 +435,7 @@ static_AdvantageInterface_ads_disconnect(VALUE imp_drh, VALUE ads_conn)
    a_ads_connection *s_ads_conn;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    s_imp_drh->api.ads_disconnect(s_ads_conn);
 
@@ -457,7 +463,7 @@ static_AdvantageInterface_ads_free_connection(VALUE imp_drh, VALUE ads_conn)
    a_ads_connection *s_ads_conn;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    s_imp_drh->api.ads_free_connection(s_ads_conn);
 
@@ -520,7 +526,7 @@ static_AdvantageInterface_ads_error(VALUE imp_drh, VALUE ads_conn)
    VALUE multi_result;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    result = s_imp_drh->api.ads_error(s_ads_conn, (UNSIGNED8 *)s_buffer, 255);
 
@@ -562,7 +568,7 @@ static_AdvantageInterface_ads_execute_immediate(VALUE imp_drh, VALUE ads_conn, V
    s_sql = StringValueCStr(sql);
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    result = s_imp_drh->api.ads_execute_immediate(s_ads_conn, (UNSIGNED8 *)s_sql);
 
@@ -604,13 +610,13 @@ static_AdvantageInterface_ads_execute_direct(VALUE imp_drh, VALUE ads_conn, VALU
    s_sql = StringValueCStr(sql);
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    resultset = s_imp_drh->api.ads_execute_direct(s_ads_conn, (UNSIGNED8 *)s_sql);
 
    if (resultset)
    {
-      tdata = INT2FIX(resultset);
+      tdata = ULL2NUM((unsigned long long)resultset);
    }
    else
    {
@@ -643,7 +649,7 @@ static_AdvantageInterface_ads_num_cols(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    result = s_imp_drh->api.ads_num_cols(s_stmt);
 
@@ -673,7 +679,7 @@ static_AdvantageInterface_ads_num_rows(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    result = s_imp_drh->api.ads_num_rows(s_stmt);
 
@@ -707,7 +713,7 @@ static_AdvantageInterface_ads_get_column(VALUE imp_drh, VALUE ads_stmt, VALUE co
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
    s_col_num = NUM2INT(col_num);
 
    result = s_imp_drh->api.ads_get_column(s_stmt, s_col_num, &value);
@@ -763,7 +769,7 @@ static_AdvantageInterface_ads_fetch_next(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    result = s_imp_drh->api.ads_fetch_next(s_stmt);
 
@@ -811,7 +817,7 @@ static_AdvantageInterface_ads_get_column_info(VALUE imp_drh, VALUE ads_stmt, VAL
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
    s_col_num = NUM2INT(col_num);
 
    result = s_imp_drh->api.ads_get_column_info(s_stmt, s_col_num, &info);
@@ -852,7 +858,7 @@ static_AdvantageInterface_AdsBeginTransaction(VALUE imp_drh, VALUE ads_conn)
    UNSIGNED32 result;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    result = s_imp_drh->api.AdsBeginTransaction(s_ads_conn->hConnect);
    if (result == 0)
@@ -883,7 +889,7 @@ static_AdvantageInterface_ads_commit(VALUE imp_drh, VALUE ads_conn)
    UNSIGNED32 result;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    result = s_imp_drh->api.ads_commit(s_ads_conn);
 
@@ -912,7 +918,7 @@ static_AdvantageInterface_ads_rollback(VALUE imp_drh, VALUE ads_conn)
    UNSIGNED32 result;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    result = s_imp_drh->api.ads_rollback(s_ads_conn);
 
@@ -951,14 +957,14 @@ static_AdvantageInterface_ads_prepare(VALUE imp_drh, VALUE ads_conn, VALUE sql)
    s_sql = StringValueCStr(sql);
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    //EJS Passing FALSE for isUnicode
    s_stmt = s_imp_drh->api.ads_prepare(s_ads_conn, (UNSIGNED8 *)s_sql, '\0');
 
    if (s_stmt)
    {
-      tdata = INT2FIX(s_stmt);
+      tdata = ULL2NUM((unsigned long long)s_stmt);
    }
    else
    {
@@ -996,7 +1002,7 @@ static_AdvantageInterface_ads_free_stmt(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    number_of_params = s_imp_drh->api.ads_num_params(s_stmt);
 
@@ -1062,7 +1068,7 @@ static_AdvantageInterface_ads_reset(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    result = s_imp_drh->api.ads_reset(s_stmt);
 
@@ -1092,7 +1098,7 @@ static_AdvantageInterface_ads_execute(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    //printf(  "CEXT s_ads_stmt: %d \n", s_stmt );
    result = s_imp_drh->api.ads_execute(s_stmt);
@@ -1127,7 +1133,7 @@ static_AdvantageInterface_ads_affected_rows(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    result = s_imp_drh->api.ads_affected_rows(s_stmt);
 
@@ -1171,7 +1177,7 @@ static_AdvantageInterface_ads_describe_bind_param(VALUE imp_drh, VALUE ads_stmt,
    memset(s_ads_bind_param, 0, sizeof(a_ads_bind_param));
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
    s_index = NUM2INT(index);
 
    result = s_imp_drh->api.ads_describe_bind_param(s_stmt, s_index, s_ads_bind_param);
@@ -1215,7 +1221,7 @@ static_AdvantageInterface_ads_bind_param(VALUE imp_drh, VALUE ads_stmt, VALUE in
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
    Data_Get_Struct(ads_bind_param, a_ads_bind_param, s_ads_bind_param);
    s_index = NUM2INT(index);
 
@@ -1255,7 +1261,7 @@ static_AdvantageInterface_ads_get_bind_param_info(VALUE imp_drh, VALUE ads_stmt,
    VALUE multi_result;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
    s_index = NUM2INT(index);
 
    result = s_imp_drh->api.ads_get_bind_param_info(s_stmt, s_index, &s_ads_bind_param_info);
@@ -1299,7 +1305,7 @@ static_AdvantageInterface_ads_num_params(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    result = s_imp_drh->api.ads_num_params(s_stmt);
 
@@ -1333,7 +1339,7 @@ static_AdvantageInterface_ads_get_next_result(VALUE imp_drh, VALUE ads_stmt)
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
 
    result = s_imp_drh->api.ads_get_next_result(s_stmt);
 
@@ -1368,7 +1374,7 @@ static_AdvantageInterface_ads_fetch_absolute(VALUE imp_drh, VALUE ads_stmt, VALU
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
    //Data_Get_Struct( ads_stmt, ADSHANDLE, s_ads_stmt );
-   s_stmt = NUM2ULONG(ads_stmt);
+   s_stmt = (ADSHANDLE)NUM2ULL(ads_stmt);
    s_offset = NUM2INT(offset);
    result = s_imp_drh->api.ads_fetch_absolute(s_stmt, s_offset);
 
@@ -1398,7 +1404,7 @@ static_AdvantageInterface_ads_sqlstate(VALUE imp_drh, VALUE ads_conn)
    char s_buffer[255];
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    result = s_imp_drh->api.ads_sqlstate(s_ads_conn, (UNSIGNED8 *)s_buffer, sizeof(s_buffer));
 
@@ -1429,7 +1435,7 @@ static_AdvantageInterface_ads_clear_error(VALUE imp_drh, VALUE ads_conn)
    a_ads_connection *s_ads_conn;
 
    Data_Get_Struct(imp_drh, imp_drh_st, s_imp_drh);
-   Data_Get_Struct(ads_conn, a_ads_connection, s_ads_conn);
+   TypedData_Get_Struct(ads_conn, a_ads_connection, &ads_connection_type, s_ads_conn);
 
    s_imp_drh->api.ads_clear_error(s_ads_conn);
 

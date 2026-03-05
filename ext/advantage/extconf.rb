@@ -24,6 +24,8 @@ require 'mkmf'
 CONFIG["debugflags"] = "-ggdb3"
 CONFIG["optflags"] = "-O0"
 
+$defs << "-Dx64" if RUBY_PLATFORM =~ /x64/
+
 dir_config('ADS')
 
 create_makefile("advantage")
