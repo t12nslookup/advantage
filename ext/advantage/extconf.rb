@@ -24,7 +24,19 @@ require 'mkmf'
 CONFIG["debugflags"] = "-ggdb3"
 CONFIG["optflags"] = "-O0"
 
-$defs << "-Dx64" if RUBY_PLATFORM =~ /x64/
+if RUBY_PLATFORM =~ /x64/
+  $defs << "-Dx64"
+elsif RUBY_PLATFORM =~ /mingw|mswin/
+  # On 32-bit MinGW, ADS_WIN32 is defined but ENTRYPOINT falls through to
+  # _declspec(dllexport) which MinGW doesn't support (needs __declspec).
+  # Defining ADS_NT routes ENTRYPOINT to plain WINAPI instead.
+  $defs << "-DADS_NT"
+end
+
+# GCC 14+ (used by newer MinGW) promotes -Wincompatible-pointer-types to an
+# error by default. The rb_define_method calls use the old VALUE(*)(ANYARGS)
+# pattern which triggers this — downgrade back to a warning.
+$CFLAGS << " -Wno-incompatible-pointer-types"
 
 dir_config('ADS')
 
